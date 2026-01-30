@@ -1,0 +1,12 @@
+{
+  "name": "taiwan-stock-tracker",
+  "version": "1.0.0",
+  "description": "台股追蹤工具 - 本地版",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
