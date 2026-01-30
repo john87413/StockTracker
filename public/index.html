@@ -3,839 +3,812 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>台股追蹤工具 v2.1</title>
+  <title>Stock Focus 戰情室</title>
   <style>
     :root {
-      --bg: #0a0a0b;
-      --bg-secondary: #111113;
-      --card-bg: #16161a;
-      --card-hover: #1c1c21;
-      --border: #2a2a2e;
-      --text: #e4e4e7;
-      --text-dim: #71717a;
-      --text-muted: #52525b;
-      --green: #22c55e;
-      --green-dim: #166534;
-      --red: #ef4444;
-      --red-dim: #991b1b;
-      --blue: #3b82f6;
-      --yellow: #eab308;
-      --purple: #a855f7;
-      --cyan: #06b6d4;
+      --bg: #09090b;
+      --bg-secondary: #18181b;
+      --card-bg: #111113;
+      --card-border: #27272a;
+      --primary: #3b82f6;
+      --text-main: #e4e4e7;
+      --text-muted: #71717a;
+      
+      /* 台股漲跌色系：紅漲綠跌 */
+      --up-color: #ef4444;   
+      --down-color: #22c55e; 
+      --flat-color: #a1a1aa;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      font-family: "SF Pro TC", "PingFang TC", "Noto Sans TC", sans-serif;
       background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      color: var(--text-main);
+      padding-bottom: 40px;
       line-height: 1.5;
     }
-    
-    /* ===== 頂部摘要列 ===== */
-    .summary-bar {
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-      font-size: 13px;
-    }
-    
-    .summary-stats {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    
-    .summary-stat {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .summary-stat .label {
-      color: var(--text-dim);
-    }
-    
-    .summary-stat .value {
-      font-weight: 600;
-    }
-    
-    .summary-stat .value.bullish { color: var(--green); }
-    .summary-stat .value.bearish { color: var(--red); }
-    
-    .summary-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--border);
-    }
-    
-    .summary-signals {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      overflow-x: auto;
-    }
-    
-    .signal-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 4px;
-      white-space: nowrap;
-      font-size: 12px;
-    }
-    
-    .signal-item.bullish { border-left: 2px solid var(--green); }
-    .signal-item.bearish { border-left: 2px solid var(--red); }
-    .signal-item.info { border-left: 2px solid var(--blue); }
-    
-    /* ===== 主容器 ===== */
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    /* ===== Header ===== */
-    header {
+
+    /* ===== Header (精簡化) ===== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(9, 9, 11, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .app-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
       gap: 12px;
+      color: #fff;
     }
     
-    h1 {
-      font-size: 20px;
-      font-weight: 600;
+    .update-badge {
+      font-size: 11px;
+      background: var(--bg-secondary);
+      padding: 4px 8px;
+      border-radius: 99px;
+      color: var(--text-muted);
+      border: 1px solid var(--card-border);
+      font-weight: 400;
+    }
+
+    .actions {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
-    
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    
-    .update-time {
-      color: var(--text-dim);
-      font-size: 12px;
-      margin-right: 8px;
-    }
-    
+
     button {
-      background: var(--blue);
-      color: white;
-      border: none;
-      padding: 8px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 6px 14px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      transition: all 0.2s;
     }
-    
-    button:hover { filter: brightness(1.1); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    button.secondary { background: var(--card-bg); border: 1px solid var(--border); }
-    button.quick { background: var(--purple); }
-    
-    /* ===== 股票網格 ===== */
+
+    button:hover { background: #27272a; border-color: #3f3f46; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    button.primary { background: var(--primary); border-color: var(--primary); color: white; }
+    button.primary:hover { filter: brightness(1.1); }
+
+    /* ===== Grid 佈局 ===== */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
     .stocks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 12px;
+      /* 卡片寬度自適應，至少 350px */
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 16px;
     }
-    
-    /* ===== 股票卡片 ===== */
-    .stock-card {
+
+    /* ===== Focus Card (改良版卡片) ===== */
+    .focus-card {
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      transition: all 0.15s;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
     }
-    
-    .stock-card:hover {
-      background: var(--card-hover);
-      border-color: #3a3a3e;
+
+    .focus-card:hover {
+      border-color: #3f3f46;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
-    
-    /* 卡片頭部：代號、名稱、評級 */
-    .card-header {
+
+    /* 1. 卡片頂部：核心資訊區 */
+    .card-top {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #1f1f22;
+    }
+
+    .card-identity {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
     }
-    
-    .stock-identity {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .stock-id {
+
+    .stock-info h3 {
       font-size: 16px;
-      font-weight: 700;
-      color: var(--cyan);
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 2px;
     }
-    
-    .stock-name {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-    
-    .stock-market {
-      font-size: 10px;
+
+    .stock-info .sub {
+      font-size: 12px;
       color: var(--text-muted);
       background: rgba(255,255,255,0.05);
       padding: 2px 6px;
-      border-radius: 3px;
-    }
-    
-    /* 評級 */
-    .rating {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
       border-radius: 4px;
     }
-    
-    .rating.strong-buy { background: var(--green-dim); color: #86efac; }
-    .rating.buy { background: #15803d; color: #bbf7d0; }
-    .rating.bullish { background: #065f46; color: #6ee7b7; }
-    .rating.neutral { background: #3f3f46; color: #a1a1aa; }
-    .rating.bearish { background: #78350f; color: #fcd34d; }
-    .rating.watch { background: #713f12; color: #fef08a; }
-    .rating.avoid { background: var(--red-dim); color: #fecaca; }
-    
-    /* 價格區塊 + Sparkline */
-    .price-section {
+
+    .price-block {
+      text-align: right;
+    }
+
+    .price-row {
       display: flex;
+      justify-content: flex-end;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
+      gap: 12px;
     }
-    
+
     .price-main {
-      flex: 1;
-    }
-    
-    .price-value {
       font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.5px;
+      line-height: 1;
     }
-    
+
     .price-change {
-      font-size: 12px;
-      margin-top: 2px;
-    }
-    
-    .price-change.positive { color: var(--green); }
-    .price-change.negative { color: var(--red); }
-    
-    /* Sparkline */
-    .sparkline-container {
-      width: 80px;
-      height: 36px;
-    }
-    
-    .sparkline {
-      width: 100%;
-      height: 100%;
-    }
-    
-    /* 數據行 */
-    .data-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    
-    .data-row.three-col {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    
-    .data-cell {
-      text-align: center;
-      padding: 8px 4px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 6px;
-    }
-    
-    .data-cell .label {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 3px;
-    }
-    
-    .data-cell .value {
       font-size: 13px;
       font-weight: 600;
+      margin-top: 4px;
     }
     
-    .data-cell .value.positive { color: var(--green); }
-    .data-cell .value.negative { color: var(--red); }
-    .data-cell .value.warning { color: var(--yellow); }
-    
-    /* Graham 數值特殊樣式 */
-    .graham-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+    .up-text { color: var(--up-color); }
+    .down-text { color: var(--down-color); }
+    .flat-text { color: var(--flat-color); }
+
+    /* Sparkline */
+    .mini-chart {
+      width: 70px; 
+      height: 28px;
+      opacity: 0.9;
     }
-    
-    .graham-indicator .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-    
-    .graham-indicator .dot.cheap { background: var(--green); }
-    .graham-indicator .dot.fair { background: var(--yellow); }
-    .graham-indicator .dot.expensive { background: var(--red); }
-    
-    /* 法人明細 */
-    .inst-row {
+
+    /* 2. 卡片 Tabs 切換區 */
+    .card-tabs {
       display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
+      background: #161618;
+      padding: 0 16px;
+      border-bottom: 1px solid #1f1f22;
     }
-    
-    .inst-chip {
+
+    .tab-btn {
       flex: 1;
       text-align: center;
-      padding: 6px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 4px;
-      font-size: 11px;
-    }
-    
-    .inst-chip .label {
+      padding: 10px 0;
+      font-size: 12px;
       color: var(--text-muted);
-      margin-bottom: 2px;
+      cursor: pointer;
+      position: relative;
+      background: transparent;
+      border: none;
+      border-radius: 0;
     }
+
+    .tab-btn:hover { color: var(--text-main); background: transparent; border-color: transparent;}
     
-    .inst-chip .value {
+    .tab-btn.active {
+      color: var(--primary);
       font-weight: 600;
     }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; 
+      left: 20%;
+      width: 60%;
+      height: 2px;
+      background: var(--primary);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* 3. 卡片內容區 */
+    .card-body {
+      padding: 16px;
+      /* 固定最小高度，防止切換時卡片跳動 */
+      min-height: 160px; 
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* 數據網格 */
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+    }
     
-    .inst-chip .value.positive { color: var(--green); }
-    .inst-chip .value.negative { color: var(--red); }
-    
-    /* 分析標籤 */
-    .tags {
+    /* 三欄網格（籌碼 Tab 用） */
+    .data-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px 10px;
+    }
+
+    .data-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .data-item .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .data-item .value {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* 視覺化進度條 (Graham / 乖離) */
+    .viz-block {
+      margin-top: 14px;
+    }
+    .viz-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .progress-track {
+      height: 6px;
+      background: #27272a;
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* 底部標籤雲 */
+    .tag-cloud {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 6px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #1f1f22;
     }
-    
-    .tag {
+
+    .micro-tag {
       font-size: 11px;
       padding: 3px 8px;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.05);
       border-radius: 4px;
+      color: #d4d4d8;
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
-    
-    /* ===== 管理面板 ===== */
-    .manage-panel {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    
-    .manage-panel.show { display: block; }
-    
-    .manage-panel h3 {
-      font-size: 15px;
-      margin-bottom: 12px;
-    }
-    
-    .manage-panel textarea {
-      width: 100%;
-      height: 100px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px;
-      color: var(--text);
-      font-family: monospace;
-      font-size: 13px;
-      resize: vertical;
-      margin-bottom: 12px;
-    }
-    
-    .manage-panel textarea:focus {
-      outline: none;
-      border-color: var(--blue);
-    }
-    
-    .manage-actions {
+
+    /* ===== Loading 狀態 (重要 UX) ===== */
+    .loading-state {
       display: flex;
-      gap: 8px;
-    }
-    
-    /* ===== Loading ===== */
-    .loading {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 0;
+      color: var(--text-muted);
       text-align: center;
-      padding: 80px 20px;
-      color: var(--text-dim);
     }
-    
+
     .spinner {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--border);
-      border-top-color: var(--blue);
+      width: 48px;
+      height: 48px;
+      border: 3px solid #27272a; 
+      border-top-color: var(--primary);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 24px;
     }
-    
+
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-size: 16px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .loading-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
     
-    /* ===== Empty State ===== */
-    .empty-state {
+    .error-state {
       text-align: center;
-      padding: 80px 20px;
-      color: var(--text-dim);
+      padding: 80px 0;
     }
     
-    .empty-state p { margin-bottom: 16px; }
-    
-    /* ===== 響應式 ===== */
-    @media (max-width: 800px) {
-      .summary-bar { padding: 10px 16px; gap: 12px; }
-      .container { padding: 16px; }
-      .stocks-grid { grid-template-columns: 1fr; }
-      .data-row { grid-template-columns: repeat(2, 1fr); }
-      .data-row.three-col { grid-template-columns: repeat(3, 1fr); }
+    .error-icon { font-size: 48px; margin-bottom: 16px; }
+
+    /* ===== 管理視窗 ===== */
+    .manage-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
     }
+    
+    .manage-modal.show { display: flex; }
+    
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 24px;
+      border-radius: 12px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content h3 { margin-bottom: 8px; font-size: 16px; }
+    
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-family: monospace;
+      font-size: 14px;
+      resize: none;
+    }
+    
+    textarea:focus { outline: none; border-color: var(--primary); }
+
+    /* ===== 響應式調整 ===== */
+    @media (max-width: 768px) {
+      .stocks-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .data-grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
   </style>
 </head>
 <body>
-  <!-- 頂部摘要列 -->
-  <div class="summary-bar" id="summaryBar">
-    <div class="summary-stats">
-      <div class="summary-stat">
-        <span class="label">持股</span>
-        <span class="value" id="sumTotal">-</span>
-      </div>
-      <div class="summary-stat">
-        <span class="label">偏多</span>
-        <span class="value bullish" id="sumBullish">-</span>
-      </div>
-      <div class="summary-stat">
-        <span class="label">中性</span>
-        <span class="value" id="sumNeutral">-</span>
-      </div>
-      <div class="summary-stat">
-        <span class="label">偏空</span>
-        <span class="value bearish" id="sumBearish">-</span>
-      </div>
+
+  <header class="app-header">
+    <div class="app-title">
+      📈 Stock Focus 
+      <span class="update-badge" id="updateTime">等待更新...</span>
     </div>
-    <div class="summary-divider"></div>
-    <div class="summary-signals" id="summarySignals">
-      <span style="color: var(--text-muted)">載入中...</span>
+    <div class="actions">
+      <button onclick="toggleManage()">⚙️ 管理</button>
+      <button class="primary" onclick="refreshData(true)" id="quickBtn">⚡ 快速</button>
+      <button onclick="refreshData(false)" id="refreshBtn">🚀 完整</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="content">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <div class="loading-text">系統初始化中...</div>
+      </div>
     </div>
   </div>
 
-  <div class="container">
-    <header>
-      <h1>📈 台股追蹤</h1>
-      <div class="header-actions">
-        <span class="update-time" id="updateTime"></span>
-        <button class="secondary" onclick="toggleManagePanel()">⚙️ 管理</button>
-        <button class="quick" onclick="refreshData(true)" id="quickBtn">⚡ 快速</button>
-        <button onclick="refreshData(false)" id="refreshBtn">🚀 完整</button>
-      </div>
-    </header>
-    
-    <div class="manage-panel" id="managePanel">
-      <h3>管理持股清單</h3>
-      <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 8px;">
-        每行一個股票代號（如 2330）
-      </p>
-      <textarea id="stockList" placeholder="2330&#10;2317&#10;2454"></textarea>
-      <div class="manage-actions">
-        <button onclick="savePortfolio()">💾 儲存</button>
-        <button class="secondary" onclick="toggleManagePanel()">取消</button>
-      </div>
-    </div>
-    
-    <div id="content">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>載入中...</p>
+  <div class="manage-modal" id="manageModal">
+    <div class="modal-content">
+      <h3>編輯追蹤清單</h3>
+      <p style="font-size: 12px; color: var(--text-muted)">輸入股票代號，每行一個</p>
+      <textarea id="stockList" placeholder="2330"></textarea>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button onclick="toggleManage()">取消</button>
+        <button class="primary" onclick="savePortfolio()">儲存變更</button>
       </div>
     </div>
   </div>
 
   <script>
-    let stockData = null;
-    
-    // ===== 資料載入 =====
+    let currentData = null;
+
+    // ===== 核心功能：資料載入 =====
     async function refreshData(quick = false) {
       const btn = document.getElementById(quick ? 'quickBtn' : 'refreshBtn');
       const content = document.getElementById('content');
       
-      btn.disabled = true;
+      // 1. 鎖定按鈕並改變文字
       const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ 更新中...';
-      
+      btn.innerHTML = '⏳ 更新中...'; 
+      btn.disabled = true;
+
+      // 2. 顯示 Loading 狀態 (給予明確的預期回饋)
       content.innerHTML = `
-        <div class="loading">
+        <div class="loading-state">
           <div class="spinner"></div>
-          <p>正在抓取資料...</p>
-          <p style="font-size: 11px; margin-top: 4px; color: var(--text-muted)">
-            ${quick ? '約 15-25 秒' : '約 30-50 秒（含技術面）'}
-          </p>
+          <div class="loading-text">正在抓取最新市場數據...</div>
+          <div class="loading-sub">
+            ${quick ? '預計需 15-20 秒 (快速版)' : '預計需 30-50 秒 (含技術指標計算)'}
+          </div>
         </div>
       `;
-      
+
       try {
         const endpoint = quick ? '/api/stocks/quick' : '/api/stocks';
         const res = await fetch(endpoint);
-        stockData = await res.json();
-        renderStocks();
-        renderSummary();
-        document.getElementById('updateTime').textContent = 
-          new Date(stockData.updatedAt).toLocaleString('zh-TW', {
-            month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
-          });
-      } catch (e) {
-        content.innerHTML = `
-          <div class="empty-state">
-            <p>❌ 載入失敗：${e.message}</p>
-            <button onclick="refreshData()">重試</button>
-          </div>
-        `;
-      }
-      
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    }
-    
-    // ===== 渲染摘要列 =====
-    function renderSummary() {
-      if (!stockData?.summary) return;
-      
-      const s = stockData.summary;
-      document.getElementById('sumTotal').textContent = s.total;
-      document.getElementById('sumBullish').textContent = s.bullish;
-      document.getElementById('sumNeutral').textContent = s.neutral;
-      document.getElementById('sumBearish').textContent = s.bearish;
-      
-      const signalsEl = document.getElementById('summarySignals');
-      
-      if (s.signals.length === 0 && s.instBuyList.length === 0 && s.instSellList.length === 0) {
-        signalsEl.innerHTML = '<span style="color: var(--text-muted)">暫無重要訊號</span>';
-        return;
-      }
-      
-      let html = '';
-      
-      // 法人買超
-      s.instBuyList.slice(0, 3).forEach(item => {
-        html += `<div class="signal-item bullish">🟢 ${item.id} 法人買超 ${formatNum(item.value)}</div>`;
-      });
-      
-      // 法人賣超
-      s.instSellList.slice(0, 2).forEach(item => {
-        html += `<div class="signal-item bearish">🔴 ${item.id} 法人賣超 ${formatNum(item.value)}</div>`;
-      });
-      
-      // 其他訊號
-      s.signals.slice(0, 3).forEach(sig => {
-        html += `<div class="signal-item ${sig.type}">${sig.text}</div>`;
-      });
-      
-      signalsEl.innerHTML = html || '<span style="color: var(--text-muted)">暫無重要訊號</span>';
-    }
-    
-    // ===== 渲染股票卡片 =====
-    function renderStocks() {
-      const content = document.getElementById('content');
-      
-      if (!stockData || stockData.stocks.length === 0) {
-        content.innerHTML = `
-          <div class="empty-state">
-            <p>尚未設定追蹤的股票</p>
-            <button onclick="toggleManagePanel()">⚙️ 新增持股</button>
-          </div>
-        `;
-        return;
-      }
-      
-      const html = stockData.stocks.map(stock => {
-        const hasTech = stock.technical && stock.technical.trend !== "無資料";
-        const sparklineHtml = renderSparkline(stock.sparkline);
-        const grahamHtml = renderGraham(stock.grahamNumber);
         
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        currentData = await res.json();
+        
+        // 更新時間戳
+        if (currentData.updatedAt) {
+          const date = new Date(currentData.updatedAt);
+          document.getElementById('updateTime').innerText = 
+            `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')} 更新`;
+        }
+
+        renderStocks();
+        
+      } catch (e) {
+        // 錯誤處理介面
+        content.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">❌</div>
+            <div class="loading-text">載入失敗</div>
+            <div class="loading-sub" style="margin-bottom: 20px;">${e.message}</div>
+            <button onclick="refreshData(${quick})" class="primary">重新嘗試</button>
+          </div>
+        `;
+      } finally {
+        // 3. 還原按鈕
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    // ===== 核心功能：渲染卡片 =====
+    function renderStocks() {
+      const container = document.getElementById('content');
+      
+      if (!currentData || !currentData.stocks || currentData.stocks.length === 0) {
+        container.innerHTML = `
+          <div class="loading-state">
+            <div class="loading-text">尚未設定追蹤股票</div>
+            <button onclick="toggleManage()" class="primary" style="margin-top:16px;">+ 新增第一檔持股</button>
+          </div>`;
+        return;
+      }
+
+      const html = currentData.stocks.map(stock => {
+        // 價格漲跌顏色邏輯
+        const priceChange = stock.sparkline?.change || 0;
+        const colorClass = priceChange > 0 ? 'up-text' : (priceChange < 0 ? 'down-text' : 'flat-text');
+        const sign = priceChange > 0 ? '+' : '';
+        
+        // Graham 估值視覺化 (進度條)
+        let gColor = '#a1a1aa';
+        let gWidth = '0%';
+        let gText = 'N/A';
+        let gStatus = '';
+        
+        if (stock.grahamNumber) {
+           const gVal = stock.grahamNumber;
+           gText = gVal.toFixed(1);
+           if(gVal < 15) { 
+             gColor = '#22c55e'; 
+             gWidth = '30%'; 
+             gStatus = '低估';
+           } else if(gVal < 22.5) { 
+             gColor = '#eab308'; 
+             gWidth = '60%'; 
+             gStatus = '合理';
+           } else { 
+             gColor = '#ef4444'; 
+             gWidth = '90%'; 
+             gStatus = '偏高';
+           }
+        }
+
+        // 營收顏色
+        const revYoy = stock.revenue.yoy || 0;
+        const revColor = revYoy > 0 ? 'var(--up-color)' : 'var(--down-color)';
+
+        // PB 估值判斷（跌破淨值提示）
+        const pbAlert = stock.pb && stock.pb < 1 ? '⚠️' : '';
+
         return `
-        <div class="stock-card">
-          <!-- 頭部 -->
-          <div class="card-header">
-            <div class="stock-identity">
-              <span class="stock-id">${stock.id}</span>
-              <span class="stock-name">${stock.name || '未知'}</span>
-              <span class="stock-market">${stock.market}</span>
-            </div>
-            <span class="rating ${stock.analysis.ratingClass}">${stock.analysis.rating}</span>
-          </div>
-          
-          <!-- 價格 + Sparkline -->
-          <div class="price-section">
-            <div class="price-main">
-              <div class="price-value">${stock.price ? stock.price.toFixed(2) : 'N/A'}</div>
-              ${stock.sparkline?.change !== null ? `
-                <div class="price-change ${stock.sparkline.change >= 0 ? 'positive' : 'negative'}">
-                  5日 ${stock.sparkline.change >= 0 ? '+' : ''}${stock.sparkline.change.toFixed(1)}%
+        <div class="focus-card" id="card-${stock.id}">
+          <div class="card-top">
+            <div class="card-identity">
+              <div class="stock-info">
+                <h3>${stock.id} ${stock.name}</h3>
+                <span class="sub">${stock.market}</span>
+              </div>
+              <div class="price-block">
+                <div class="price-row">
+                  ${renderSparkline(stock.sparkline)}
+                  <span class="price-main ${colorClass}">${stock.price ? stock.price.toFixed(2) : '--'}</span>
                 </div>
-              ` : ''}
-            </div>
-            <div class="sparkline-container">
-              ${sparklineHtml}
-            </div>
-          </div>
-          
-          <!-- 估值面 -->
-          <div class="data-row">
-            <div class="data-cell">
-              <div class="label">本益比</div>
-              <div class="value">${stock.pe ? stock.pe.toFixed(1) : '-'}</div>
-            </div>
-            <div class="data-cell">
-              <div class="label">淨值比</div>
-              <div class="value">${stock.pb ? stock.pb.toFixed(2) : '-'}</div>
-            </div>
-            <div class="data-cell">
-              <div class="label">殖利率</div>
-              <div class="value">${stock.yieldRate ? stock.yieldRate.toFixed(1) + '%' : '-'}</div>
-            </div>
-            <div class="data-cell">
-              <div class="label">Graham</div>
-              <div class="value">${grahamHtml}</div>
-            </div>
-          </div>
-          
-          <!-- 成長 & 籌碼 -->
-          <div class="data-row">
-            <div class="data-cell">
-              <div class="label">單月營收</div>
-              <div class="value ${getValueClass(stock.revenue.yoy)}">
-                ${formatPercent(stock.revenue.yoy)}
-              </div>
-            </div>
-            <div class="data-cell">
-              <div class="label">累計營收</div>
-              <div class="value ${getValueClass(stock.revenue.cumYoy)}">
-                ${formatPercent(stock.revenue.cumYoy)}
-              </div>
-            </div>
-            <div class="data-cell">
-              <div class="label">法人5日</div>
-              <div class="value ${getValueClass(stock.institutional.sum5)}">
-                ${stock.institutional.sum5Display}
-              </div>
-            </div>
-            <div class="data-cell">
-              <div class="label">連續</div>
-              <div class="value ${getValueClass(stock.institutional.consecutiveDays)}">
-                ${stock.institutional.consecutiveDisplay}
+                <div class="price-change ${colorClass}">
+                  ${sign}${priceChange.toFixed(2)}%
+                </div>
               </div>
             </div>
           </div>
-          
-          ${hasTech ? `
-          <!-- 技術面 -->
-          <div class="data-row">
-            <div class="data-cell">
-              <div class="label">季線</div>
-              <div class="value">${stock.technical.ma60 ? stock.technical.ma60.toFixed(0) : '-'}</div>
-            </div>
-            <div class="data-cell">
-              <div class="label">離季線</div>
-              <div class="value ${getValueClass(stock.technical.distanceFromMa60)}">
-                ${stock.technical.distanceDisplay}
+
+          <div class="card-tabs">
+            <button class="tab-btn active" onclick="switchTab('${stock.id}', 'basic')">基本</button>
+            <button class="tab-btn" onclick="switchTab('${stock.id}', 'chips')">籌碼</button>
+            <button class="tab-btn" onclick="switchTab('${stock.id}', 'tech')">技術</button>
+          </div>
+
+          <div class="card-body">
+            
+            <!-- ========== 基本面 Tab（3 欄布局）========== -->
+            <div id="tab-basic-${stock.id}" class="tab-content active">
+              <div class="data-grid-3">
+                <div class="data-item">
+                  <span class="label">本益比 (PE)</span>
+                  <span class="value">${stock.pe ? stock.pe.toFixed(1) : '-'}</span>
+                </div>
+                <div class="data-item">
+                  <span class="label">淨值比 (PB)</span>
+                  <span class="value ${stock.pb && stock.pb < 1 ? 'down-text' : ''}">
+                    ${pbAlert} ${stock.pb ? stock.pb.toFixed(2) : '-'}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">殖利率</span>
+                  <span class="value" style="color: #eab308">
+                    ${stock.yieldRate ? stock.yieldRate.toFixed(1)+'%' : '-'}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">單月營收</span>
+                  <span class="value" style="color: ${revColor}">
+                    ${formatPercent(stock.revenue.yoy)}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">累計營收</span>
+                  <span class="value" style="color: ${getColor(stock.revenue.cumYoy)}">
+                    ${formatPercent(stock.revenue.cumYoy)}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">Graham</span>
+                  <span class="value" style="font-size: 13px;">
+                    ${gText} ${gStatus ? `(${gStatus})` : ''}
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="data-cell">
-              <div class="label">3月漲跌</div>
-              <div class="value ${getValueClass(stock.technical.change3m)}">
-                ${stock.technical.change3mDisplay}
+
+            <!-- ========== 籌碼面 Tab（新增當日買賣超，改成3欄）========== -->
+            <div id="tab-chips-${stock.id}" class="tab-content">
+               <div class="data-grid-3">
+                <div class="data-item">
+                  <span class="label">法人5日</span>
+                  <span class="value ${stock.institutional.sum5 > 0 ? 'up-text' : (stock.institutional.sum5 < 0 ? 'down-text' : '')}">
+                    ${stock.institutional.sum5Display}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">今日動向</span>
+                  <span class="value ${stock.institutional.today > 0 ? 'up-text' : (stock.institutional.today < 0 ? 'down-text' : '')}">
+                    ${stock.institutional.todayDisplay}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">連續天數</span>
+                  <span class="value">${stock.institutional.consecutiveDisplay}</span>
+                </div>
+               </div>
+               
+               <div class="viz-block">
+                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px;">
+                      <div class="label" style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">外資</div>
+                      <div style="font-size:13px; font-weight:500; color: ${getColor(stock.institutional.foreign5)}">
+                        ${formatNum(stock.institutional.foreign5)}
+                      </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px;">
+                      <div class="label" style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">投信</div>
+                      <div style="font-size:13px; font-weight:500; color: ${getColor(stock.institutional.trust5)}">
+                        ${formatNum(stock.institutional.trust5)}
+                      </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px;">
+                      <div class="label" style="font-size:10px; color:var(--text-muted); margin-bottom:2px;">自營</div>
+                      <div style="font-size:13px; font-weight:500; color: ${getColor(stock.institutional.dealer5)}">
+                        ${formatNum(stock.institutional.dealer5)}
+                      </div>
+                    </div>
+                 </div>
+               </div>
+            </div>
+
+            <!-- ========== 技術面 Tab ========== -->
+            <div id="tab-tech-${stock.id}" class="tab-content">
+              ${stock.technical ? `
+              <div class="data-grid">
+                <div class="data-item">
+                  <span class="label">趨勢判斷</span>
+                  <span class="value" style="font-size:14px;">${stock.technical.trend}</span>
+                </div>
+                <div class="data-item">
+                  <span class="label">離季線乖離</span>
+                  <span class="value ${Math.abs(stock.technical.distanceFromMa60) > 10 ? 'up-text' : ''}">
+                    ${stock.technical.distanceDisplay}
+                  </span>
+                </div>
+                <div class="data-item">
+                  <span class="label">近3月漲跌</span>
+                  <span class="value">${stock.technical.change3mDisplay}</span>
+                </div>
+                <div class="data-item">
+                  <span class="label">季線 (60MA)</span>
+                  <span class="value">${stock.technical.ma60 ? stock.technical.ma60.toFixed(0) : '-'}</span>
+                </div>
               </div>
+              ` : `
+              <div style="text-align:center; padding: 30px 0; color: var(--text-muted);">
+                <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+                <div style="font-size: 12px;">點擊「完整更新」<br>以取得技術指標</div>
+              </div>
+              `}
             </div>
-            <div class="data-cell">
-              <div class="label">趨勢</div>
-              <div class="value">${stock.technical.trend}</div>
+
+            <div class="tag-cloud">
+               ${stock.analysis.tags.slice(0, 3).map(t => `<span class="micro-tag">${t.icon} ${t.text}</span>`).join('')}
             </div>
-          </div>
-          ` : ''}
-          
-          <!-- 法人明細 -->
-          <div class="inst-row">
-            <div class="inst-chip">
-              <div class="label">外資</div>
-              <div class="value ${getValueClass(stock.institutional.foreign5)}">${formatNum(stock.institutional.foreign5)}</div>
-            </div>
-            <div class="inst-chip">
-              <div class="label">投信</div>
-              <div class="value ${getValueClass(stock.institutional.trust5)}">${formatNum(stock.institutional.trust5)}</div>
-            </div>
-            <div class="inst-chip">
-              <div class="label">自營</div>
-              <div class="value ${getValueClass(stock.institutional.dealer5)}">${formatNum(stock.institutional.dealer5)}</div>
-            </div>
-            <div class="inst-chip">
-              <div class="label">當日</div>
-              <div class="value ${getValueClass(stock.institutional.today)}">${stock.institutional.todayDisplay}</div>
-            </div>
-          </div>
-          
-          <!-- 標籤 -->
-          <div class="tags">
-            ${stock.analysis.tags.map(t => `<span class="tag">${t.icon} ${t.text}</span>`).join('')}
           </div>
         </div>
-      `}).join('');
-      
-      content.innerHTML = `<div class="stocks-grid">${html}</div>`;
+        `;
+      }).join('');
+
+      container.innerHTML = `<div class="stocks-grid">${html}</div>`;
     }
-    
-    // ===== 繪製 Sparkline =====
-    function renderSparkline(sparkline) {
-      if (!sparkline?.prices || sparkline.prices.length < 2) {
-        return '<svg class="sparkline"></svg>';
-      }
+
+    // ===== Tab 切換邏輯 (DOM操作) =====
+    window.switchTab = function(stockId, tabName) {
+      const card = document.getElementById(`card-${stockId}`);
       
+      // 1. 切換按鈕狀態
+      const btns = card.querySelectorAll('.tab-btn');
+      btns.forEach(btn => btn.classList.remove('active'));
+      
+      // 根據 tabName 找到對應索引
+      const map = { 'basic': 0, 'chips': 1, 'tech': 2 };
+      if (btns[map[tabName]]) {
+        btns[map[tabName]].classList.add('active');
+      }
+
+      // 2. 切換內容顯示
+      const contents = card.querySelectorAll('.tab-content');
+      contents.forEach(c => c.classList.remove('active'));
+      
+      const target = document.getElementById(`tab-${tabName}-${stockId}`);
+      if(target) target.classList.add('active');
+    };
+
+    // ===== 輔助工具 =====
+    function renderSparkline(sparkline) {
+      if (!sparkline?.prices || sparkline.prices.length < 2) return '';
       const prices = sparkline.prices;
       const min = Math.min(...prices);
       const max = Math.max(...prices);
-      const range = max - min || 1;
+      const width = 70, height = 28;
       
-      const width = 80;
-      const height = 36;
-      const padding = 2;
-      
+      // 計算 SVG 路徑
       const points = prices.map((p, i) => {
-        const x = padding + (i / (prices.length - 1)) * (width - padding * 2);
-        const y = height - padding - ((p - min) / range) * (height - padding * 2);
+        const x = (i / (prices.length - 1)) * width;
+        const y = height - ((p - min) / (max - min || 1)) * height;
         return `${x},${y}`;
       }).join(' ');
       
-      const color = sparkline.change >= 0 ? 'var(--green)' : 'var(--red)';
+      const color = sparkline.change >= 0 ? 'var(--up-color)' : 'var(--down-color)';
       
       return `
-        <svg class="sparkline" viewBox="0 0 ${width} ${height}">
-          <polyline 
-            points="${points}" 
-            fill="none" 
-            stroke="${color}" 
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      `;
+        <svg class="mini-chart" viewBox="0 0 ${width} ${height}">
+          <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
     }
-    
-    // ===== 渲染 Graham Number =====
-    function renderGraham(value) {
-      if (value === null || value === undefined) return '-';
-      
-      let dotClass = 'fair';
-      if (value < 15) dotClass = 'cheap';
-      else if (value > 22.5) dotClass = 'expensive';
-      
-      return `
-        <span class="graham-indicator">
-          <span class="dot ${dotClass}"></span>
-          ${value.toFixed(1)}
-        </span>
-      `;
-    }
-    
-    // ===== 輔助函式 =====
+
     function formatNum(n) {
-      if (n === 0 || n === null || n === undefined) return '-';
-      const sign = n > 0 ? '+' : '';
-      if (Math.abs(n) >= 1000) return sign + (n / 1000).toFixed(1) + 'K';
-      return sign + n;
+      if (!n && n !== 0) return '-';
+      return (n/1000).toFixed(1) + 'K';
     }
-    
+
     function formatPercent(n) {
-      if (n === null || n === undefined) return '-';
-      const sign = n > 0 ? '+' : '';
-      return sign + n.toFixed(1) + '%';
+      if (n == null) return '-';
+      return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
     }
     
-    function getValueClass(n) {
-      if (n === null || n === undefined || n === 0) return '';
-      return n > 0 ? 'positive' : 'negative';
+    function getColor(n) {
+      if (n > 0) return 'var(--up-color)';
+      if (n < 0) return 'var(--down-color)';
+      return 'var(--text-muted)';
     }
-    
-    // ===== 管理面板 =====
-    async function toggleManagePanel() {
-      const panel = document.getElementById('managePanel');
-      panel.classList.toggle('show');
+
+    // ===== 管理清單功能 =====
+    async function toggleManage() {
+      const modal = document.getElementById('manageModal');
+      const isShow = modal.classList.contains('show');
       
-      if (panel.classList.contains('show')) {
-        const res = await fetch('/api/portfolio');
-        const config = await res.json();
-        document.getElementById('stockList').value = config.portfolio.join('\n');
+      if (!isShow) {
+        // 開啟時載入
+        try {
+          const res = await fetch('/api/portfolio');
+          const data = await res.json();
+          document.getElementById('stockList').value = data.portfolio.join('\n');
+          modal.classList.add('show');
+        } catch(e) { console.error(e); }
+      } else {
+        modal.classList.remove('show');
       }
     }
-    
+
     async function savePortfolio() {
-      const text = document.getElementById('stockList').value;
-      const stocks = text.split('\n')
-        .map(s => s.trim())
-        .filter(s => s && /^\d{4,5}$/.test(s));
-      
-      await fetch('/api/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          portfolio: stocks,
-          settings: { institutionalDays: 5 }
-        })
-      });
-      
-      toggleManagePanel();
-      refreshData(false);
+      const btn = document.querySelector('#manageModal button.primary');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '儲存中...';
+      btn.disabled = true;
+
+      try {
+        const text = document.getElementById('stockList').value;
+        const list = text.split('\n').map(s => s.trim()).filter(s => s && /^\d{4,5}$/.test(s));
+        
+        await fetch('/api/portfolio', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ portfolio: list })
+        });
+        
+        toggleManage(); // 關閉視窗
+        refreshData(true); // 自動重新抓取數據
+      } catch(e) {
+        alert('儲存失敗');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     }
-    
-    // ===== 初始載入 =====
-    refreshData(true);
+
+    // 頁面載入後自動執行一次
+    // refreshData(true);
+
   </script>
 </body>
 </html>
