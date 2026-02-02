@@ -15,13 +15,14 @@ export function useStocks(type: FetchType) {
     queryKey: ['stocks', type],
     queryFn: () => fetchStocks(type),
     
-    // 1. 關閉自動輪詢 (原本是 30*1000)
+    // 預設不自動執行，等待使用者按按鈕
+    enabled: false, 
+
+    // 保持手動控制，不自動輪詢
     refetchInterval: false, 
-    
-    // 2. 視窗切換回來時也不要自動更新 (完全聽使用者的)
     refetchOnWindowFocus: false,
     
-    // 3. 資料保持新鮮 5 分鐘 (這期間切換 Tab 不會重抓，除非手動按更新)
+    // 資料快取 5 分鐘
     staleTime: 1000 * 60 * 5, 
   });
 }
