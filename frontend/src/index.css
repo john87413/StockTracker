@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-stock-bg text-stock-text antialiased;
+  }
+}
+
+/* 自定義捲軸樣式 (讓深色模式更好看) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-stock-bg;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-stock-border rounded-full hover:bg-zinc-600;
+}
