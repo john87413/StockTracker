@@ -1,48 +1,94 @@
 /**
- * 綜合分析模組
+ * 綜合分析模組 v2.0 - 支援產業分類
  */
 
 /**
- * 完整版綜合評估（整合估值/成長/籌碼/技術面）
+ * 完整版綜合評估（整合估值/成長/籌碼/技術面 + 產業分類）
  */
-function analyzeStockComplete(pe, pb, yieldRate, revenueYoY, instStats, tech) {
+function analyzeStockComplete(pe, pb, yieldRate, revenueYoY, instStats, tech, sectorBenchmark = null) {
   const tags = [];
   let score = 0;
   
-  // ========== 估值面 ==========
+  // ========== 估值面（產業化判斷）==========
   if (pe > 0 && pb > 0) {
     const grahamValue = pe * pb;
-    if (grahamValue < 15) {
-      tags.push({ icon: "🔥", text: "強烈低估" });
-      score += 2;
-    } else if (grahamValue < 22.5) {
-      tags.push({ icon: "✅", text: "價值合理" });
-      score += 1;
-    } else if (grahamValue > 50) {
-      tags.push({ icon: "⚠️", text: "估值偏高" });
-      score -= 1;
+    
+    if (sectorBenchmark) {
+      // 使用產業基準判斷
+      const threshold = sectorBenchmark.grahamThreshold;
+      
+      if (grahamValue < threshold * 0.7) {
+        tags.push({ icon: "🔥", text: "同業低估" });
+        score += 2;
+      } else if (grahamValue < threshold) {
+        tags.push({ icon: "✅", text: "估值合理" });
+        score += 1;
+      } else if (grahamValue > threshold * 1.5) {
+        tags.push({ icon: "⚠️", text: "同業偏高" });
+        score -= 1;
+      }
+      
+      // PE 相對判斷
+      const [peMin, peMax] = sectorBenchmark.peRange;
+      if (pe < peMin) {
+        tags.push({ icon: "📉", text: "低PE" });
+        score += 1;
+      } else if (pe > peMax * 1.2) {
+        tags.push({ icon: "📈", text: "高PE" });
+        score -= 1;
+      }
+      
+      // PB 相對判斷
+      const [pbMin, pbMax] = sectorBenchmark.pbRange;
+      if (pb < pbMin) {
+        tags.push({ icon: "🛡️", text: "低PB" });
+        score += 1;
+      }
+      
+      // 殖利率判斷（產業化）
+      const yieldMin = sectorBenchmark.yieldMin;
+      if (yieldRate > yieldMin * 1.5) {
+        tags.push({ icon: "💰", text: "超高息" });
+        score += 2;
+      } else if (yieldRate > yieldMin) {
+        tags.push({ icon: "💵", text: "高息" });
+        score += 1;
+      }
+      
+    } else {
+      // 沒有產業基準時使用舊邏輯（向下相容）
+      if (grahamValue < 15) {
+        tags.push({ icon: "🔥", text: "強烈低估" });
+        score += 2;
+      } else if (grahamValue < 22.5) {
+        tags.push({ icon: "✅", text: "價值合理" });
+        score += 1;
+      } else if (grahamValue > 50) {
+        tags.push({ icon: "⚠️", text: "估值偏高" });
+        score -= 1;
+      }
+      
+      if (pb > 0 && pb < 1) {
+        tags.push({ icon: "🛡️", text: "跌破淨值" });
+        score += 1;
+      }
+      
+      if (yieldRate > 7) {
+        tags.push({ icon: "💰", text: "超高息" });
+        score += 2;
+      } else if (yieldRate > 5) {
+        tags.push({ icon: "💵", text: "高息" });
+        score += 1;
+      }
+      
+      if (pe > 0 && pe < 10) {
+        tags.push({ icon: "📉", text: "低PE" });
+        score += 1;
+      } else if (pe > 30) {
+        tags.push({ icon: "📈", text: "高PE" });
+        score -= 1;
+      }
     }
-  }
-  
-  if (pb > 0 && pb < 1) {
-    tags.push({ icon: "🛡️", text: "跌破淨值" });
-    score += 1;
-  }
-  
-  if (yieldRate > 7) {
-    tags.push({ icon: "💰", text: "超高息" });
-    score += 2;
-  } else if (yieldRate > 5) {
-    tags.push({ icon: "💵", text: "高息" });
-    score += 1;
-  }
-  
-  if (pe > 0 && pe < 10) {
-    tags.push({ icon: "📉", text: "低PE" });
-    score += 1;
-  } else if (pe > 30) {
-    tags.push({ icon: "📈", text: "高PE" });
-    score -= 1;
   }
   
   // ========== 成長面 ==========
@@ -136,10 +182,10 @@ function analyzeStockComplete(pe, pb, yieldRate, revenueYoY, instStats, tech) {
     if (tech.distanceFromMa60 !== null) {
       if (tech.distanceFromMa60 > 20) {
         tags.push({ icon: "⚠️", text: "乖離過大" });
-        score -= 1;  // 漲多了，風險較高
+        score -= 1;
       } else if (tech.distanceFromMa60 < -15) {
         tags.push({ icon: "💡", text: "超跌反彈機會" });
-        score += 1;  // 跌深了，可能有機會
+        score += 1;
       }
     }
     
@@ -147,10 +193,8 @@ function analyzeStockComplete(pe, pb, yieldRate, revenueYoY, instStats, tech) {
     if (tech.change3m !== null) {
       if (tech.change3m > 30) {
         tags.push({ icon: "🔥", text: "近期強勢" });
-        // 不加分，因為可能追高風險
       } else if (tech.change3m < -20) {
         tags.push({ icon: "📉", text: "近期弱勢" });
-        // 不扣分，因為可能是撿便宜機會
       }
     }
   }
@@ -196,44 +240,90 @@ function analyzeStockComplete(pe, pb, yieldRate, revenueYoY, instStats, tech) {
 /**
  * 基本版綜合評估（不含技術面，保持向下相容）
  */
-function analyzeStock(pe, pb, yieldRate, revenueYoY, instStats) {
+function analyzeStock(pe, pb, yieldRate, revenueYoY, instStats, sectorBenchmark = null) {
   const tags = [];
   let score = 0;
   
-  // ========== 估值面 ==========
+  // ========== 估值面（產業化判斷）==========
   if (pe > 0 && pb > 0) {
     const grahamValue = pe * pb;
-    if (grahamValue < 15) {
-      tags.push({ icon: "🔥", text: "強烈低估" });
-      score += 2;
-    } else if (grahamValue < 22.5) {
-      tags.push({ icon: "✅", text: "價值合理" });
-      score += 1;
-    } else if (grahamValue > 50) {
-      tags.push({ icon: "⚠️", text: "估值偏高" });
-      score -= 1;
+    
+    if (sectorBenchmark) {
+      // 使用產業基準判斷
+      const threshold = sectorBenchmark.grahamThreshold;
+      
+      if (grahamValue < threshold * 0.7) {
+        tags.push({ icon: "🔥", text: "同業低估" });
+        score += 2;
+      } else if (grahamValue < threshold) {
+        tags.push({ icon: "✅", text: "估值合理" });
+        score += 1;
+      } else if (grahamValue > threshold * 1.5) {
+        tags.push({ icon: "⚠️", text: "同業偏高" });
+        score -= 1;
+      }
+      
+      // PE 相對判斷
+      const [peMin, peMax] = sectorBenchmark.peRange;
+      if (pe < peMin) {
+        tags.push({ icon: "📉", text: "低PE" });
+        score += 1;
+      } else if (pe > peMax * 1.2) {
+        tags.push({ icon: "📈", text: "高PE" });
+        score -= 1;
+      }
+      
+      // PB 相對判斷
+      const [pbMin, pbMax] = sectorBenchmark.pbRange;
+      if (pb < pbMin) {
+        tags.push({ icon: "🛡️", text: "低PB" });
+        score += 1;
+      }
+      
+      // 殖利率判斷（產業化）
+      const yieldMin = sectorBenchmark.yieldMin;
+      if (yieldRate > yieldMin * 1.5) {
+        tags.push({ icon: "💰", text: "超高息" });
+        score += 2;
+      } else if (yieldRate > yieldMin) {
+        tags.push({ icon: "💵", text: "高息" });
+        score += 1;
+      }
+      
+    } else {
+      // 沒有產業基準時使用舊邏輯
+      if (grahamValue < 15) {
+        tags.push({ icon: "🔥", text: "強烈低估" });
+        score += 2;
+      } else if (grahamValue < 22.5) {
+        tags.push({ icon: "✅", text: "價值合理" });
+        score += 1;
+      } else if (grahamValue > 50) {
+        tags.push({ icon: "⚠️", text: "估值偏高" });
+        score -= 1;
+      }
+      
+      if (pb > 0 && pb < 1) {
+        tags.push({ icon: "🛡️", text: "跌破淨值" });
+        score += 1;
+      }
+      
+      if (yieldRate > 7) {
+        tags.push({ icon: "💰", text: "超高息" });
+        score += 2;
+      } else if (yieldRate > 5) {
+        tags.push({ icon: "💵", text: "高息" });
+        score += 1;
+      }
+      
+      if (pe > 0 && pe < 10) {
+        tags.push({ icon: "📉", text: "低PE" });
+        score += 1;
+      } else if (pe > 30) {
+        tags.push({ icon: "📈", text: "高PE" });
+        score -= 1;
+      }
     }
-  }
-  
-  if (pb > 0 && pb < 1) {
-    tags.push({ icon: "🛡️", text: "跌破淨值" });
-    score += 1;
-  }
-  
-  if (yieldRate > 7) {
-    tags.push({ icon: "💰", text: "超高息" });
-    score += 2;
-  } else if (yieldRate > 5) {
-    tags.push({ icon: "💵", text: "高息" });
-    score += 1;
-  }
-  
-  if (pe > 0 && pe < 10) {
-    tags.push({ icon: "📉", text: "低PE" });
-    score += 1;
-  } else if (pe > 30) {
-    tags.push({ icon: "📈", text: "高PE" });
-    score -= 1;
   }
   
   // ========== 成長面 ==========

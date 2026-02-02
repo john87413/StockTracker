@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,15 +14,19 @@
       --primary: #3b82f6;
       --text-main: #e4e4e7;
       --text-muted: #71717a;
-      
+
       /* 台股漲跌色系：紅漲綠跌 */
-      --up-color: #ef4444;   
-      --down-color: #22c55e; 
+      --up-color: #ef4444;
+      --down-color: #22c55e;
       --flat-color: #a1a1aa;
     }
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: "SF Pro TC", "PingFang TC", "Noto Sans TC", sans-serif;
       background: var(--bg);
@@ -53,7 +58,7 @@
       gap: 12px;
       color: #fff;
     }
-    
+
     .update-badge {
       font-size: 11px;
       background: var(--bg-secondary);
@@ -81,10 +86,25 @@
       transition: all 0.2s;
     }
 
-    button:hover { background: #27272a; border-color: #3f3f46; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    button.primary { background: var(--primary); border-color: var(--primary); color: white; }
-    button.primary:hover { filter: brightness(1.1); }
+    button:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    button.primary:hover {
+      filter: brightness(1.1);
+    }
 
     /* ===== Grid 佈局 ===== */
     .container {
@@ -115,7 +135,7 @@
     .focus-card:hover {
       border-color: #3f3f46;
       transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     /* 1. 卡片頂部：核心資訊區 */
@@ -140,7 +160,7 @@
     .stock-info .sub {
       font-size: 12px;
       color: var(--text-muted);
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       padding: 2px 6px;
       border-radius: 4px;
     }
@@ -168,14 +188,22 @@
       font-weight: 600;
       margin-top: 4px;
     }
-    
-    .up-text { color: var(--up-color); }
-    .down-text { color: var(--down-color); }
-    .flat-text { color: var(--flat-color); }
+
+    .up-text {
+      color: var(--up-color);
+    }
+
+    .down-text {
+      color: var(--down-color);
+    }
+
+    .flat-text {
+      color: var(--flat-color);
+    }
 
     /* Sparkline */
     .mini-chart {
-      width: 70px; 
+      width: 70px;
       height: 28px;
       opacity: 0.9;
     }
@@ -201,8 +229,12 @@
       border-radius: 0;
     }
 
-    .tab-btn:hover { color: var(--text-main); background: transparent; border-color: transparent;}
-    
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: transparent;
+      border-color: transparent;
+    }
+
     .tab-btn.active {
       color: var(--primary);
       font-weight: 600;
@@ -211,7 +243,7 @@
     .tab-btn.active::after {
       content: '';
       position: absolute;
-      bottom: -1px; 
+      bottom: -1px;
       left: 20%;
       width: 60%;
       height: 2px;
@@ -223,13 +255,27 @@
     .card-body {
       padding: 16px;
       /* 固定最小高度，防止切換時卡片跳動 */
-      min-height: 160px; 
+      min-height: 160px;
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s; }
+    .tab-content {
+      display: none;
+    }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
 
     /* 數據網格 */
     .data-grid {
@@ -237,7 +283,7 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px 16px;
     }
-    
+
     /* 三欄網格（籌碼 Tab 用） */
     .data-grid-3 {
       display: grid;
@@ -265,6 +311,7 @@
     .viz-block {
       margin-top: 14px;
     }
+
     .viz-header {
       display: flex;
       justify-content: space-between;
@@ -272,6 +319,7 @@
       color: var(--text-muted);
       margin-bottom: 4px;
     }
+
     .progress-track {
       height: 6px;
       background: #27272a;
@@ -279,6 +327,7 @@
       overflow: hidden;
       position: relative;
     }
+
     .progress-fill {
       height: 100%;
       border-radius: 3px;
@@ -298,7 +347,7 @@
     .micro-tag {
       font-size: 11px;
       padding: 3px 8px;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 4px;
       color: #d4d4d8;
       display: flex;
@@ -320,14 +369,18 @@
     .spinner {
       width: 48px;
       height: 48px;
-      border: 3px solid #27272a; 
+      border: 3px solid #27272a;
       border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 24px;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     .loading-text {
       font-size: 16px;
@@ -340,28 +393,36 @@
       font-size: 13px;
       color: var(--text-muted);
     }
-    
+
     .error-state {
       text-align: center;
       padding: 80px 0;
     }
-    
-    .error-icon { font-size: 48px; margin-bottom: 16px; }
+
+    .error-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
 
     /* ===== 管理視窗 ===== */
     .manage-modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
       z-index: 100;
       justify-content: center;
       align-items: center;
       backdrop-filter: blur(4px);
     }
-    
-    .manage-modal.show { display: flex; }
-    
+
+    .manage-modal.show {
+      display: flex;
+    }
+
     .modal-content {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -371,9 +432,12 @@
       max-width: 90%;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     }
-    
-    .modal-content h3 { margin-bottom: 8px; font-size: 16px; }
-    
+
+    .modal-content h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
     textarea {
       width: 100%;
       height: 150px;
@@ -387,27 +451,30 @@
       font-size: 14px;
       resize: none;
     }
-    
-    textarea:focus { outline: none; border-color: var(--primary); }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
 
     /* ===== 響應式調整 ===== */
     @media (max-width: 768px) {
       .stocks-grid {
         grid-template-columns: 1fr;
       }
-      
+
       .data-grid-3 {
         grid-template-columns: 1fr 1fr;
       }
     }
-
   </style>
 </head>
+
 <body>
 
   <header class="app-header">
     <div class="app-title">
-      📈 Stock Focus 
+      📈 Stock Focus
       <span class="update-badge" id="updateTime">等待更新...</span>
     </div>
     <div class="actions">
@@ -445,10 +512,10 @@
     async function refreshData(quick = false) {
       const btn = document.getElementById(quick ? 'quickBtn' : 'refreshBtn');
       const content = document.getElementById('content');
-      
+
       // 1. 鎖定按鈕並改變文字
       const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ 更新中...'; 
+      btn.innerHTML = '⏳ 更新中...';
       btn.disabled = true;
 
       // 2. 顯示 Loading 狀態 (給予明確的預期回饋)
@@ -465,20 +532,20 @@
       try {
         const endpoint = quick ? '/api/stocks/quick' : '/api/stocks';
         const res = await fetch(endpoint);
-        
+
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
+
         currentData = await res.json();
-        
+
         // 更新時間戳
         if (currentData.updatedAt) {
           const date = new Date(currentData.updatedAt);
-          document.getElementById('updateTime').innerText = 
-            `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')} 更新`;
+          document.getElementById('updateTime').innerText =
+            `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} 更新`;
         }
 
         renderStocks();
-        
+
       } catch (e) {
         // 錯誤處理介面
         content.innerHTML = `
@@ -499,7 +566,7 @@
     // ===== 核心功能：渲染卡片 =====
     function renderStocks() {
       const container = document.getElementById('content');
-      
+
       if (!currentData || !currentData.stocks || currentData.stocks.length === 0) {
         container.innerHTML = `
           <div class="loading-state">
@@ -514,29 +581,52 @@
         const priceChange = stock.sparkline?.change || 0;
         const colorClass = priceChange > 0 ? 'up-text' : (priceChange < 0 ? 'down-text' : 'flat-text');
         const sign = priceChange > 0 ? '+' : '';
-        
-        // Graham 估值視覺化 (進度條)
+
+        // Graham 估值判斷（產業化）
         let gColor = '#a1a1aa';
         let gWidth = '0%';
         let gText = 'N/A';
         let gStatus = '';
-        
-        if (stock.grahamNumber) {
-           const gVal = stock.grahamNumber;
-           gText = gVal.toFixed(1);
-           if(gVal < 15) { 
-             gColor = '#22c55e'; 
-             gWidth = '30%'; 
-             gStatus = '低估';
-           } else if(gVal < 22.5) { 
-             gColor = '#eab308'; 
-             gWidth = '60%'; 
-             gStatus = '合理';
-           } else { 
-             gColor = '#ef4444'; 
-             gWidth = '90%'; 
-             gStatus = '偏高';
-           }
+
+        if (stock.grahamNumber && stock.grahamThreshold) {
+          const gVal = stock.grahamNumber;
+          const threshold = stock.grahamThreshold;
+          gText = gVal.toFixed(1);
+
+          if (gVal < threshold * 0.7) {
+            gColor = '#22c55e';
+            gWidth = '30%';
+            gStatus = '低估';
+          } else if (gVal < threshold) {
+            gColor = '#eab308';
+            gWidth = '60%';
+            gStatus = '合理';
+          } else if (gVal < threshold * 1.5) {
+            gColor = '#f97316';
+            gWidth = '80%';
+            gStatus = '偏高';
+          } else {
+            gColor = '#ef4444';
+            gWidth = '95%';
+            gStatus = '過高';
+          }
+        } else if (stock.grahamNumber) {
+          // 沒有產業基準，使用舊判斷
+          const gVal = stock.grahamNumber;
+          gText = gVal.toFixed(1);
+          if (gVal < 15) {
+            gColor = '#22c55e';
+            gWidth = '30%';
+            gStatus = '低估';
+          } else if (gVal < 22.5) {
+            gColor = '#eab308';
+            gWidth = '60%';
+            gStatus = '合理';
+          } else {
+            gColor = '#ef4444';
+            gWidth = '90%';
+            gStatus = '偏高';
+          }
         }
 
         // 營收顏色
@@ -552,7 +642,7 @@
             <div class="card-identity">
               <div class="stock-info">
                 <h3>${stock.id} ${stock.name}</h3>
-                <span class="sub">${stock.market}</span>
+                <span class="sub">${stock.market} / ${stock.sectorName}</span>
               </div>
               <div class="price-block">
                 <div class="price-row">
@@ -590,7 +680,7 @@
                 <div class="data-item">
                   <span class="label">殖利率</span>
                   <span class="value" style="color: #eab308">
-                    ${stock.yieldRate ? stock.yieldRate.toFixed(1)+'%' : '-'}
+                    ${stock.yieldRate ? stock.yieldRate.toFixed(1) + '%' : '-'}
                   </span>
                 </div>
                 <div class="data-item">
@@ -702,13 +792,13 @@
     }
 
     // ===== Tab 切換邏輯 (DOM操作) =====
-    window.switchTab = function(stockId, tabName) {
+    window.switchTab = function (stockId, tabName) {
       const card = document.getElementById(`card-${stockId}`);
-      
+
       // 1. 切換按鈕狀態
       const btns = card.querySelectorAll('.tab-btn');
       btns.forEach(btn => btn.classList.remove('active'));
-      
+
       // 根據 tabName 找到對應索引
       const map = { 'basic': 0, 'chips': 1, 'tech': 2 };
       if (btns[map[tabName]]) {
@@ -718,9 +808,9 @@
       // 2. 切換內容顯示
       const contents = card.querySelectorAll('.tab-content');
       contents.forEach(c => c.classList.remove('active'));
-      
+
       const target = document.getElementById(`tab-${tabName}-${stockId}`);
-      if(target) target.classList.add('active');
+      if (target) target.classList.add('active');
     };
 
     // ===== 輔助工具 =====
@@ -730,16 +820,16 @@
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       const width = 70, height = 28;
-      
+
       // 計算 SVG 路徑
       const points = prices.map((p, i) => {
         const x = (i / (prices.length - 1)) * width;
         const y = height - ((p - min) / (max - min || 1)) * height;
         return `${x},${y}`;
       }).join(' ');
-      
+
       const color = sparkline.change >= 0 ? 'var(--up-color)' : 'var(--down-color)';
-      
+
       return `
         <svg class="mini-chart" viewBox="0 0 ${width} ${height}">
           <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -748,14 +838,14 @@
 
     function formatNum(n) {
       if (!n && n !== 0) return '-';
-      return (n/1000).toFixed(1) + 'K';
+      return (n / 1000).toFixed(1) + 'K';
     }
 
     function formatPercent(n) {
       if (n == null) return '-';
       return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
     }
-    
+
     function getColor(n) {
       if (n > 0) return 'var(--up-color)';
       if (n < 0) return 'var(--down-color)';
@@ -766,7 +856,7 @@
     async function toggleManage() {
       const modal = document.getElementById('manageModal');
       const isShow = modal.classList.contains('show');
-      
+
       if (!isShow) {
         // 開啟時載入
         try {
@@ -774,7 +864,7 @@
           const data = await res.json();
           document.getElementById('stockList').value = data.portfolio.join('\n');
           modal.classList.add('show');
-        } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
       } else {
         modal.classList.remove('show');
       }
@@ -789,16 +879,16 @@
       try {
         const text = document.getElementById('stockList').value;
         const list = text.split('\n').map(s => s.trim()).filter(s => s && /^\d{4,5}$/.test(s));
-        
+
         await fetch('/api/portfolio', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ portfolio: list })
         });
-        
+
         toggleManage(); // 關閉視窗
         refreshData(true); // 自動重新抓取數據
-      } catch(e) {
+      } catch (e) {
         alert('儲存失敗');
       } finally {
         btn.innerHTML = originalText;
@@ -811,4 +901,5 @@
 
   </script>
 </body>
+
 </html>

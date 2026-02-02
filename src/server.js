@@ -1,6 +1,6 @@
 /**
- * 台股追蹤工具 - 本地伺服器 v2.0
- * 整合技術面分析
+ * 台股追蹤工具 - 本地伺服器 v2.1
+ * 整合產業分類系統
  */
 
 const http = require('http');
@@ -18,9 +18,20 @@ const DATA_FILE = path.join(__dirname, '../data/portfolio.json');
 // 讀取設定
 function loadConfig() {
   try {
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const config = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    
+    // 向下相容：如果 portfolio 是舊格式的陣列，轉換成新格式
+    if (Array.isArray(config.portfolio) && typeof config.portfolio[0] === 'string') {
+      config.portfolio = config.portfolio.map(id => ({ id, sector: null, note: '' }));
+    }
+    
+    return config;
   } catch (e) {
-    return { portfolio: [], settings: {} };
+    return { 
+      portfolio: [], 
+      sectorBenchmarks: {},
+      settings: {} 
+    };
   }
 }
 
@@ -29,16 +40,27 @@ function saveConfig(config) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(config, null, 2));
 }
 
+// 取得產業基準
+function getSectorBenchmark(sector, sectorBenchmarks) {
+  if (!sector || !sectorBenchmarks || !sectorBenchmarks[sector]) {
+    return null;
+  }
+  return sectorBenchmarks[sector];
+}
+
 // 取得股票資料（完整版，含技術面）
 async function getStockDataComplete() {
   const config = loadConfig();
-  const stockIds = config.portfolio;
+  const stockList = config.portfolio || [];
+  const sectorBenchmarks = config.sectorBenchmarks || {};
   
-  if (stockIds.length === 0) {
+  if (stockList.length === 0) {
     return { stocks: [], updatedAt: new Date().toISOString(), summary: getEmptySummary() };
   }
   
-  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（含技術面）==========\n`);
+  const stockIds = stockList.map(item => item.id);
+  
+  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（含技術面 + 產業分類）==========\n`);
   
   // 載入基本資料
   const { ratios, prices, revenue } = await getAllBasicData();
@@ -53,7 +75,11 @@ async function getStockDataComplete() {
   const sparklineData = await getSparklineData(stockIds, ratios);
   
   // 組合結果
-  const stocks = stockIds.map(id => {
+  const stocks = stockList.map(stockItem => {
+    const id = stockItem.id;
+    const sector = stockItem.sector;
+    const note = stockItem.note || '';
+    
     const ratio = ratios[id] || { name: "", pe: 0, yieldRate: 0, pb: 0, market: null };
     const price = prices[id] || null;
     const rev = revenue[id] || { yoy: null, cumYoy: null };
@@ -61,18 +87,33 @@ async function getStockDataComplete() {
     const tech = techData[id] || getEmptyTechnical();
     const sparkline = sparklineData[id] || { prices: [], change: null };
     
+    // 取得產業基準
+    const sectorBenchmark = getSectorBenchmark(sector, sectorBenchmarks);
+    
     // 計算 Graham Number (PE * PB)
     const grahamNumber = (ratio.pe > 0 && ratio.pb > 0) ? ratio.pe * ratio.pb : null;
     
-    // 使用完整版分析（含技術面）
-    const analysis = analyzeStockComplete(ratio.pe, ratio.pb, ratio.yieldRate, rev.yoy, inst, tech);
+    // 使用完整版分析（含技術面 + 產業基準）
+    const analysis = analyzeStockComplete(
+      ratio.pe, 
+      ratio.pb, 
+      ratio.yieldRate, 
+      rev.yoy, 
+      inst, 
+      tech,
+      sectorBenchmark
+    );
     
     return {
       id,
       name: ratio.name,
+      note,
+      sector: sector,
+      sectorName: sectorBenchmark?.name || '未分類',
       market: ratio.market === 'OTC' ? '上櫃' : (ratio.market === 'TWSE' ? '上市' : '未知'),
       price,
       grahamNumber,
+      grahamThreshold: sectorBenchmark?.grahamThreshold || null,
       pe: ratio.pe || null,
       pb: ratio.pb || null,
       yieldRate: ratio.yieldRate || null,
@@ -120,6 +161,7 @@ async function getStockDataComplete() {
   return {
     stocks,
     summary,
+    sectorBenchmarks,
     updatedAt: new Date().toISOString()
   };
 }
@@ -127,13 +169,16 @@ async function getStockDataComplete() {
 // 取得股票資料（快速版，不含技術面）
 async function getStockDataBasic() {
   const config = loadConfig();
-  const stockIds = config.portfolio;
+  const stockList = config.portfolio || [];
+  const sectorBenchmarks = config.sectorBenchmarks || {};
   
-  if (stockIds.length === 0) {
+  if (stockList.length === 0) {
     return { stocks: [], updatedAt: new Date().toISOString(), summary: getEmptySummary() };
   }
   
-  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（快速版）==========\n`);
+  const stockIds = stockList.map(item => item.id);
+  
+  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（快速版 + 產業分類）==========\n`);
   
   // 載入基本資料
   const { ratios, prices, revenue } = await getAllBasicData();
@@ -141,29 +186,47 @@ async function getStockDataBasic() {
   // 載入法人資料
   const instData = await getInstitutionalAnalysis(config.settings?.institutionalDays || 5);
   
-  // 載入 Sparkline 資料（快速版也需要）
+  // 載入 Sparkline 資料
   const sparklineData = await getSparklineData(stockIds, ratios);
   
   // 組合結果
-  const stocks = stockIds.map(id => {
+  const stocks = stockList.map(stockItem => {
+    const id = stockItem.id;
+    const sector = stockItem.sector;
+    const note = stockItem.note || '';
+    
     const ratio = ratios[id] || { name: "", pe: 0, yieldRate: 0, pb: 0, market: null };
     const price = prices[id] || null;
     const rev = revenue[id] || { yoy: null, cumYoy: null };
     const inst = instData[id] || { today: 0, sum5: 0, consecutiveDays: 0, foreign5: 0, trust5: 0, dealer5: 0 };
     const sparkline = sparklineData[id] || { prices: [], change: null };
     
+    // 取得產業基準
+    const sectorBenchmark = getSectorBenchmark(sector, sectorBenchmarks);
+    
     // 計算 Graham Number (PE * PB)
     const grahamNumber = (ratio.pe > 0 && ratio.pb > 0) ? ratio.pe * ratio.pb : null;
     
-    // 使用基本版分析
-    const analysis = analyzeStock(ratio.pe, ratio.pb, ratio.yieldRate, rev.yoy, inst);
+    // 使用基本版分析（含產業基準）
+    const analysis = analyzeStock(
+      ratio.pe, 
+      ratio.pb, 
+      ratio.yieldRate, 
+      rev.yoy, 
+      inst,
+      sectorBenchmark
+    );
     
     return {
       id,
       name: ratio.name,
+      note,
+      sector: sector,
+      sectorName: sectorBenchmark?.name || '未分類',
       market: ratio.market === 'OTC' ? '上櫃' : (ratio.market === 'TWSE' ? '上市' : '未知'),
       price,
       grahamNumber,
+      grahamThreshold: sectorBenchmark?.grahamThreshold || null,
       pe: ratio.pe || null,
       pb: ratio.pb || null,
       yieldRate: ratio.yieldRate || null,
@@ -199,6 +262,7 @@ async function getStockDataBasic() {
   return {
     stocks,
     summary,
+    sectorBenchmarks,
     updatedAt: new Date().toISOString()
   };
 }
@@ -207,12 +271,13 @@ async function getStockDataBasic() {
 function calculateSummary(stocks) {
   const summary = {
     total: stocks.length,
-    bullish: 0,      // 偏多（含強力買進、建議買進、偏多觀望）
-    neutral: 0,      // 中性
-    bearish: 0,      // 偏空（含偏空觀望、建議避開）
-    instBuyList: [], // 今日法人買超
-    instSellList: [], // 今日法人賣超
-    signals: []      // 重要訊號
+    bullish: 0,
+    neutral: 0,
+    bearish: 0,
+    instBuyList: [],
+    instSellList: [],
+    signals: [],
+    bySector: {}  // 新增：依產業分組統計
   };
   
   stocks.forEach(stock => {
@@ -225,6 +290,18 @@ function calculateSummary(stocks) {
     } else {
       summary.bearish++;
     }
+    
+    // 產業分組統計
+    const sectorName = stock.sectorName || '未分類';
+    if (!summary.bySector[sectorName]) {
+      summary.bySector[sectorName] = { count: 0, stocks: [] };
+    }
+    summary.bySector[sectorName].count++;
+    summary.bySector[sectorName].stocks.push({
+      id: stock.id,
+      name: stock.name,
+      rating: stock.analysis.rating
+    });
     
     // 法人買賣超
     if (stock.institutional.today > 100) {
@@ -247,7 +324,7 @@ function calculateSummary(stocks) {
       });
     }
     
-    // 技術面訊號（只在有技術資料時檢查）
+    // 技術面訊號
     if (stock.technical && stock.technical.distanceFromMa60 !== null) {
       if (stock.technical.distanceFromMa60 > -3 && stock.technical.distanceFromMa60 < 3) {
         summary.signals.push({ 
@@ -265,7 +342,7 @@ function calculateSummary(stocks) {
     }
   });
   
-  // 排序（買超大的在前）
+  // 排序
   summary.instBuyList.sort((a, b) => b.value - a.value);
   summary.instSellList.sort((a, b) => a.value - b.value);
   
@@ -281,7 +358,8 @@ function getEmptySummary() {
     bearish: 0,
     instBuyList: [],
     instSellList: [],
-    signals: []
+    signals: [],
+    bySector: {}
   };
 }
 
@@ -384,9 +462,10 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════╗
-║     台股追蹤工具 v2.0                   ║
+║     台股追蹤工具 v2.1                   ║
 ║     http://localhost:${PORT}              ║
 ║                                        ║
+║     新功能：產業分類系統                ║
 ║     API:                               ║
 ║     GET /api/stocks      完整更新      ║
 ║     GET /api/stocks/quick 快速更新     ║

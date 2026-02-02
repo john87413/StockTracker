@@ -1,13 +1,102 @@
 {
   "portfolio": [
-    "2330",
-    "2317",
-    "2454",
-    "2480",
-    "3701",
-    "5403",
-    "5425",
-    "6205",
-    "6263"
-  ]
+    {
+      "id": "2330",
+      "sector": "semiconductor",
+      "note": "台積電"
+    },
+    {
+      "id": "2317",
+      "sector": "electronics",
+      "note": "鴻海"
+    },
+    {
+      "id": "2454",
+      "sector": "semiconductor",
+      "note": "聯發科"
+    },
+    {
+      "id": "2480",
+      "sector": "software",
+      "note": "敦陽科"
+    },
+    {
+      "id": "3701",
+      "sector": "finance",
+      "note": "大眾控"
+    },
+    {
+      "id": "5403",
+      "sector": "electronics",
+      "note": "中菲"
+    },
+    {
+      "id": "5425",
+      "sector": "electronics",
+      "note": "台半"
+    },
+    {
+      "id": "6205",
+      "sector": "electronics",
+      "note": "詮欣"
+    },
+    {
+      "id": "6263",
+      "sector": "electronics",
+      "note": "普萊德"
+    }
+  ],
+  "sectorBenchmarks": {
+    "semiconductor": {
+      "name": "半導體",
+      "peRange": [12, 28],
+      "pbRange": [2, 5],
+      "grahamThreshold": 70,
+      "yieldMin": 2,
+      "description": "高PE、高PB為常態，重視成長性"
+    },
+    "electronics": {
+      "name": "電子零組件",
+      "peRange": [10, 20],
+      "pbRange": [1.5, 3.5],
+      "grahamThreshold": 45,
+      "yieldMin": 3,
+      "description": "中等估值，重視獲利穩定性"
+    },
+    "finance": {
+      "name": "金融",
+      "peRange": [8, 15],
+      "pbRange": [0.7, 1.3],
+      "grahamThreshold": 20,
+      "yieldMin": 5,
+      "description": "低PB常態，高股息"
+    },
+    "software": {
+      "name": "軟體/資安",
+      "peRange": [15, 35],
+      "pbRange": [2, 6],
+      "grahamThreshold": 90,
+      "yieldMin": 1,
+      "description": "輕資產、高PE，重視營收成長"
+    },
+    "shipping": {
+      "name": "航運",
+      "peRange": [3, 12],
+      "pbRange": [0.5, 2],
+      "grahamThreshold": 25,
+      "yieldMin": 4,
+      "description": "景氣循環股，波動大"
+    },
+    "retail": {
+      "name": "通路/零售",
+      "peRange": [10, 18],
+      "pbRange": [1, 2.5],
+      "grahamThreshold": 35,
+      "yieldMin": 3.5,
+      "description": "重視存貨週轉和營業利益率"
+    }
+  },
+  "settings": {
+    "institutionalDays": 5
+  }
 }
