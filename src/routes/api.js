@@ -7,10 +7,7 @@ const express = require('express');
 const router = express.Router();
 
 // 業務邏輯服務
-const {
-  getStocksComplete,
-  getStocksQuick
-} = require('../services/stockService');
+const { getStocks } = require('../services/stockService');
 
 // ============== 股票資料 API ==============
 
@@ -20,7 +17,7 @@ const {
  */
 router.get('/stocks', async (req, res, next) => {
   try {
-    const data = await getStocksComplete();
+    const data = await getStocks(true);
     res.json(data);
   } catch (error) {
     next(error);
@@ -33,7 +30,7 @@ router.get('/stocks', async (req, res, next) => {
  */
 router.get('/stocks/quick', async (req, res, next) => {
   try {
-    const data = await getStocksQuick();
+    const data = await getStocks(false);
     res.json(data);
   } catch (error) {
     next(error);

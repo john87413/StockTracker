@@ -108,7 +108,7 @@ function transformTechnical(rawTech, includeTechnical = true) {
 function transformStock({
   stockItem,
   rawData,
-  analyzeFn,
+  analyzeStock,
   includeTechnical = true
 }) {
   const { id, sector, note = '' } = stockItem;
@@ -129,7 +129,7 @@ function transformStock({
   const grahamNumber = calculateGrahamNumber(ratio.pe, ratio.pb);
   
   // 執行分析
-  const analysis = analyzeFn(ratio, rev, inst, tech, sectorBenchmark);
+  const analysis = analyzeStock(ratio, rev, inst, tech, sectorBenchmark);
   
   // 組合最終結果
   return {
@@ -156,25 +156,6 @@ function transformStock({
     technical: transformTechnical(tech, includeTechnical),
     analysis
   };
-}
-
-/**
- * 批次轉換股票清單
- */
-function transformStockList({
-  stockList,
-  rawData,
-  analyzeFn,
-  includeTechnical = true
-}) {
-  return stockList.map(stockItem =>
-    transformStock({
-      stockItem,
-      rawData,
-      analyzeFn,
-      includeTechnical
-    })
-  );
 }
 
 // ============== 完整 API 回應組裝 ==============
@@ -206,7 +187,6 @@ function buildEmptyResponse() {
 module.exports = {
   // 主要轉換函式
   transformStock,
-  transformStockList,
   
   // API 回應組裝
   buildApiResponse,

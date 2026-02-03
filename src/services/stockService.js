@@ -8,7 +8,7 @@ const { getAllBasicData, getInstitutionalAnalysis } = require('../datasource');
 const { getTechnicalAnalysis, getSparklineData } = require('../technical');
 
 // 分析模組
-const { analyzeStock, analyzeStockComplete } = require('../analysis');
+const { analyzeStock } = require('./analysis');
 
 // 設定檔管理
 const {
@@ -19,41 +19,10 @@ const {
 
 // 資料轉換
 const {
-  transformStockList,
+  transformStock,
   buildApiResponse,
   buildEmptyResponse
 } = require('../transformers/stockTransformer');
-
-// ============== 分析函式工廠 ==============
-
-/**
- * 建立完整版分析函式（含技術面
- */
-function createCompleteAnalyzer(ratio, rev, inst, tech, sectorBenchmark) {
-  return analyzeStockComplete(
-    ratio.pe,
-    ratio.pb,
-    ratio.yieldRate,
-    rev.yoy,
-    inst,
-    tech,
-    sectorBenchmark
-  );
-}
-
-/**
- * 建立基本版分析函式（不含技術面
- */
-function createBasicAnalyzer(ratio, rev, inst, tech, sectorBenchmark) {
-  return analyzeStock(
-    ratio.pe,
-    ratio.pb,
-    ratio.yieldRate,
-    rev.yoy,
-    inst,
-    sectorBenchmark
-  );
-}
 
 // ============== 資料載入器 ==============
 
@@ -63,19 +32,19 @@ function createBasicAnalyzer(ratio, rev, inst, tech, sectorBenchmark) {
 async function loadRawData({ stockIds, institutionalDays, includeTechnical }) {
   // 載入基本資料
   const { ratios, prices, revenue } = await getAllBasicData();
-  
+
   // 載入法人資料
   const instData = await getInstitutionalAnalysis(institutionalDays);
-  
+
   // 載入 Sparkline 資料
   const sparklineData = await getSparklineData(stockIds, ratios);
-  
+
   // 條件載入技術面資料
   let techData = null;
   if (includeTechnical) {
     techData = await getTechnicalAnalysis(stockIds, ratios);
   }
-  
+
   return {
     ratios,
     prices,
@@ -89,76 +58,41 @@ async function loadRawData({ stockIds, institutionalDays, includeTechnical }) {
 // ============== 核心服務函式 ==============
 
 /**
- * 取得股票資料（完整版，含技術面）
+ * 取得股票資料
  */
-async function getStocksComplete() {
+async function getStocks(includeTechnical = true) {
   const stockList = getPortfolio();
   const sectorBenchmarks = getSectorBenchmarks();
-  
+
   // 空清單處理
   if (stockList.length === 0) {
     return buildEmptyResponse();
   }
-  
+
   const stockIds = stockList.map(item => item.id);
   const institutionalDays = getInstitutionalDays();
-  
-  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（完整版）==========\n`);
-  
+
+  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票 ==========\n`);
+
   // 載入原始資料
   const rawData = await loadRawData({
     stockIds,
     institutionalDays,
-    includeTechnical: true
+    includeTechnical
   });
-  
-  // 轉換資料
-  const stocks = transformStockList({
-    stockList,
-    rawData,
-    analyzeFn: createCompleteAnalyzer,
-    includeTechnical: true
-  });
-  
-  console.log(`\n========== 更新完成 ==========\n`);
-  
-  return buildApiResponse(stocks, sectorBenchmarks);
-}
 
-/**
- * 取得股票資料（快速版，不含技術面）
- */
-async function getStocksQuick() {
-  const stockList = getPortfolio();
-  const sectorBenchmarks = getSectorBenchmarks();
-  
-  // 空清單處理
-  if (stockList.length === 0) {
-    return buildEmptyResponse();
-  }
-  
-  const stockIds = stockList.map(item => item.id);
-  const institutionalDays = getInstitutionalDays();
-  
-  console.log(`\n========== 開始更新 ${stockIds.length} 檔股票（快速版）==========\n`);
-  
-  // 載入原始資料（不含技術面）
-  const rawData = await loadRawData({
-    stockIds,
-    institutionalDays,
-    includeTechnical: false
-  });
-  
   // 轉換資料
-  const stocks = transformStockList({
-    stockList,
-    rawData,
-    analyzeFn: createBasicAnalyzer,
-    includeTechnical: false
-  });
-  
+  const stocks = stockList.map(stockItem =>
+    transformStock({
+      stockItem,
+      rawData,
+      analyzeStock,
+      includeTechnical
+    })
+  );
+
   console.log(`\n========== 更新完成 ==========\n`);
-  
+
   return buildApiResponse(stocks, sectorBenchmarks);
 }
 
@@ -166,6 +100,5 @@ async function getStocksQuick() {
 
 module.exports = {
   // 核心服務
-  getStocksComplete,
-  getStocksQuick
+  getStocks,
 };

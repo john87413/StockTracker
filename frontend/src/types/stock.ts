@@ -51,8 +51,6 @@ export interface AnalysisTag {
 
 export interface StockAnalysis {
   score: number;           // 綜合評分 (-5 ~ 5)
-  rating: string;          // 評級文字 (例如 "強力買進")
-  ratingClass: 'strong-buy' | 'buy' | 'bullish' | 'neutral' | 'bearish' | 'avoid' | 'watch'; 
   tags: AnalysisTag[];     // 分析標籤
 }
 
