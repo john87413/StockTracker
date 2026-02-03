@@ -80,7 +80,7 @@ export function StockCard({ stock }: StockCardProps) {
         </div>
       </div>
 
-      {/* Tabs: 還原 py-2.5 高度與底線樣式 */}
+      {/* Tabs */}
       <div className="flex px-3 bg-[#161618] border-b border-[#1f1f22]">
         {TABS.map((tab) => (
           <button
@@ -131,11 +131,11 @@ export function StockCard({ stock }: StockCardProps) {
             
             {/* Graham 顯示還原 */}
             <div className="flex flex-col">
-              <span className="text-[10px] text-stock-muted mb-0.5">Graham</span>
+              <span className="text-[12px] text-stock-muted mb-0.5">Graham</span>
               <div className="text-[15px] font-medium leading-tight text-stock-text">
                  {stock.grahamNumber?.toFixed(1)}
                  {grahamInfo && (
-                   <span className={cn("text-xs ml-1", grahamInfo.color)}>
+                   <span className={cn("text-[12px] ml-1", grahamInfo.color)}>
                      ({grahamInfo.text})
                    </span>
                  )}
@@ -194,11 +194,11 @@ export function StockCard({ stock }: StockCardProps) {
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-[#1f1f22] align-end">
            {stock.analysis.tags.length > 0 ? stock.analysis.tags.slice(0, 3).map((tag, idx) => (
-             <span key={idx} className="text-[10px] px-2 py-0.5 bg-white/5 rounded text-zinc-300 flex items-center gap-1 border border-white/5">
+             <span key={idx} className="text-[12px] px-2 py-0.5 bg-white/5 rounded text-zinc-300 flex items-center gap-1 border border-white/5">
                {tag.icon} {tag.text}
              </span>
            )) : (
-             <span className="text-[10px] text-stock-muted">無特殊訊號</span>
+             <span className="text-[12px] text-stock-muted">無特殊訊號</span>
            )}
         </div>
       </div>
@@ -207,14 +207,13 @@ export function StockCard({ stock }: StockCardProps) {
 }
 
 // 內部小元件
-const InfoItem = ({ label, value, renderValue, valueClass = '', alert, sub }: any) => (
+const InfoItem = ({ label, value, renderValue, valueClass = '', alert }: any) => (
   <div className="flex flex-col">
-    <span className="text-[11px] text-stock-muted mb-1">{label}</span>
+    <span className="text-[12px] text-stock-muted mb-1">{label}</span>
     <div className={cn("text-[15px] font-medium leading-tight flex items-center gap-1", valueClass || 'text-stock-text')}>
       {alert && <span className="text-xs">⚠️</span>}
       {renderValue ? renderValue : (value || '-')}
     </div>
-    {sub && <span className="text-[9px] text-stock-muted/70 mt-0.5">{sub}</span>}
   </div>
 );
 
