@@ -4,7 +4,7 @@
  */
 
 // 外部 API 模組
-const { getAllBasicData, getInstitutionalAnalysis } = require('../api');
+const { getAllBasicData, getInstitutionalAnalysis } = require('../datasource');
 const { getTechnicalAnalysis, getSparklineData } = require('../technical');
 
 // 分析模組
