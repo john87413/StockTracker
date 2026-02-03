@@ -181,11 +181,6 @@ function getEmptyTechnical() {
 }
 
 module.exports = {
-  calculateMA,
-  calculateAllMA,
-  calculatePriceChange,
-  calculateDeviation,
-  determineTrend,
   calculateIndicators,
   getEmptyTechnical
 };

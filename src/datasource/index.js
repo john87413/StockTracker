@@ -1,5 +1,4 @@
 /**
- * 台股 API 模組 v2.0
  * 
  * 架構：
  * - config.js: API URL 和設定集中管理
@@ -9,12 +8,6 @@
  *   - otcFetcher.js: 上櫃資料
  * - processors/: 資料處理器
  *   - institutionalProcessor.js: 法人資料處理
- * 
- * 主要改善：
- * 1. URL 集中管理，易於維護
- * 2. 上市/上櫃邏輯分離但共用基礎設施
- * 3. 資料處理邏輯獨立，易於測試
- * 4. 錯誤處理統一
  */
 
 // 上市資料抓取器
@@ -80,48 +73,12 @@ async function getAllBasicData() {
   return result;
 }
 
-/**
- * 取得單一市場的基本面資料
- */
-async function getMarketBasicData(market) {
-  if (market === 'TWSE') {
-    const [ratios, prices, revenue] = await Promise.all([
-      getTWSEPeRatio(),
-      getTWSEPrices(),
-      getTWSERevenue()
-    ]);
-    return { ratios, prices, revenue };
-  }
-  
-  if (market === 'OTC') {
-    const [ratios, prices, revenue] = await Promise.all([
-      getOTCPeRatio(),
-      getOTCPrices(),
-      getOTCRevenue()
-    ]);
-    return { ratios, prices, revenue };
-  }
-  
-  throw new Error(`未知的市場類型: ${market}`);
-}
-
 // ============== 匯出 ==============
 
 module.exports = {
   // 主要 API（向下相容）
   getAllBasicData,
   getInstitutionalAnalysis,
-  
-  // 個別函式（供進階使用）
-  getAllTWSEPEratio: getTWSEPeRatio,
-  getAllTWSEPrices: getTWSEPrices,
-  getAllTWSERevenue: getTWSERevenue,
-  getAllOTCPEratio: getOTCPeRatio,
-  getAllOTCPrices: getOTCPrices,
-  getAllOTCRevenue: getOTCRevenue,
-  
-  // 新增的進階 API
-  getMarketBasicData,
   
   // 設定（供外部讀取）
   config

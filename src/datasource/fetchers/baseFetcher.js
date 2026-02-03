@@ -8,10 +8,6 @@ const { REQUEST_CONFIG } = require('../config');
 
 /**
  * 抓取 JSON 資料並驗證
- * @param {string} url - API URL
- * @param {string} description - 描述（用於 log）
- * @param {number} delay - 請求前延遲（毫秒）
- * @returns {Promise<Array|null>} 資料陣列或 null
  */
 async function fetchAndValidate(url, description, delay = REQUEST_CONFIG.delay.default) {
   console.log(`正在載入${description}...`);
@@ -29,10 +25,6 @@ async function fetchAndValidate(url, description, delay = REQUEST_CONFIG.delay.d
 
 /**
  * 抓取並轉換為 Map
- * @param {string} url - API URL
- * @param {string} description - 描述
- * @param {Function} transformer - 轉換函式 (item) => { key, value } | null
- * @returns {Promise<Object>} 轉換後的 Map
  */
 async function fetchToMap(url, description, transformer) {
   const data = await fetchAndValidate(url, description);
@@ -57,27 +49,7 @@ async function fetchToMap(url, description, transformer) {
 }
 
 /**
- * 並行抓取多個資料源
- * @param {Array<{url: string, description: string, transformer: Function}>} sources 
- * @returns {Promise<Object>} 合併後的 Map
- */
-async function fetchMultipleSources(sources) {
-  const results = await Promise.all(
-    sources.map(({ url, description, transformer }) => 
-      fetchToMap(url, description, transformer)
-    )
-  );
-  
-  // 合併所有結果
-  return results.reduce((acc, map) => ({ ...acc, ...map }), {});
-}
-
-/**
  * 帶重試的 fetch
- * @param {string} url - URL
- * @param {Object} options - fetch 選項
- * @param {number} maxAttempts - 最大重試次數
- * @returns {Promise<Response|null>}
  */
 async function fetchWithRetry(url, options = {}, maxAttempts = REQUEST_CONFIG.retry.maxAttempts) {
   const finalOptions = {
@@ -106,8 +78,6 @@ async function fetchWithRetry(url, options = {}, maxAttempts = REQUEST_CONFIG.re
 
 /**
  * 安全解析 JSON 回應
- * @param {Response} response - fetch 回應
- * @returns {Promise<Object|null>} 解析後的 JSON 或 null
  */
 async function safeParseJson(response) {
   if (!response || !response.ok) {
@@ -131,9 +101,7 @@ async function safeParseJson(response) {
 }
 
 module.exports = {
-  fetchAndValidate,
   fetchToMap,
-  fetchMultipleSources,
   fetchWithRetry,
   safeParseJson
 };

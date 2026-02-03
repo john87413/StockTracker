@@ -6,19 +6,12 @@
  * - yahooFetcher.js: Yahoo Finance 資料抓取
  * - indicators.js: 技術指標計算
  * - formatters.js: 格式化工具
- * 
- * 主要改善：
- * 1. Yahoo Finance API 設定集中管理
- * 2. 資料抓取與計算邏輯分離
- * 3. 均線參數可配置
- * 4. 格式化函式獨立
  */
 
 const { sleep } = require('../utils');
 const { toYahooSymbol, REQUEST_CONFIG, SPARKLINE } = require('./config');
 const { fetchHistory, fetchSparklineData } = require('./yahooFetcher');
 const { calculateIndicators, getEmptyTechnical } = require('./indicators');
-const { formatDistanceFromMA, formatPriceChange, formatMA, formatTrendWithColor } = require('./formatters');
 
 // ============== 主要 API ==============
 
@@ -118,41 +111,11 @@ async function getSparklineData(stockIds, ratios) {
   return result;
 }
 
-/**
- * 取得單檔股票的技術分析資料
- */
-async function getSingleTechnicalAnalysis(stockId, market) {
-  const yahooSymbol = toYahooSymbol(stockId, market);
-  const history = await fetchHistory(yahooSymbol);
-  
-  if (history && history.length > 0) {
-    return calculateIndicators(history);
-  }
-  
-  return getEmptyTechnical();
-}
-
 // ============== 匯出 ==============
 
 module.exports = {
   // 主要 API（向下相容）
   getTechnicalAnalysis,
   getSparklineData,
-  getEmptyTechnical,
-  formatDistanceFromMA,
-  formatPriceChange,
-  
-  // 新增 API
-  getSingleTechnicalAnalysis,
-  
-  // 進階功能（供測試或進階使用）
-  formatters: {
-    formatDistanceFromMA,
-    formatPriceChange,
-    formatMA,
-    formatTrendWithColor
-  },
-  
-  indicators: require('./indicators'),
-  config: require('./config')
+  getEmptyTechnical
 };

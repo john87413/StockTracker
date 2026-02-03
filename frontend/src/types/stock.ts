@@ -11,9 +11,7 @@ export interface StockRevenue {
  */
 export interface StockInstitutional {
   today: number;           // 今日買賣超 (張)
-  todayDisplay: string;    // 格式化後的今日買賣超 (例如 "+1.2K")
   sum5: number;            // 近5日累計
-  sum5Display: string;     // 格式化後的近5日累計
   consecutiveDays: number; // 連續買賣天數 (正為買，負為賣)
   consecutiveDisplay: string; // 格式化後的連續天數 (例如 "連買3天")
   foreign5: number;        // 外資近5日
@@ -29,11 +27,8 @@ export interface StockTechnical {
   ma60: number | null;
   ma120: number | null;
   distanceFromMa60: number | null; // 乖離率 (%)
-  distanceDisplay: string;         // 格式化後的乖離率
   change1m: number | null;         // 近1月漲跌
-  change1mDisplay: string;
   change3m: number | null;         // 近3月漲跌
-  change3mDisplay: string;
   trend: string;                   // 趨勢判斷 (例如 "多頭排列", "偏多整理")
   dataPoints: number;
 }

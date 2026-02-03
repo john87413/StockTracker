@@ -93,21 +93,10 @@ function formatConsecutiveDays(days) {
   return days > 0 ? `連買${days}天` : `連賣${Math.abs(days)}天`;
 }
 
-// 格式化法人累計
-function formatInstitutionalSum(value) {
-  if (value === 0 || value === null || value === undefined) return "-";
-  const sign = value > 0 ? "+" : "";
-  if (Math.abs(value) >= 1000) {
-    return `${sign}${(value / 1000).toFixed(1)}K`;
-  }
-  return `${sign}${value}`;
-}
-
 module.exports = {
   safeParseFloat,
   fetchJson,
   sleep,
   getLastNTradingDates,
   formatConsecutiveDays,
-  formatInstitutionalSum
 };

@@ -8,7 +8,6 @@ const { TPEX, TPEX_FIELDS, MARKET_TYPE } = require('../config');
 
 /**
  * 取得上櫃股票基本面資料（本益比、殖利率、股價淨值比）
- * @returns {Promise<Object>} { [stockId]: { name, pe, yieldRate, pb, market } }
  */
 async function getOTCPeRatio() {
   const fields = TPEX_FIELDS.peRatio;
@@ -36,7 +35,6 @@ async function getOTCPeRatio() {
 
 /**
  * 取得上櫃股票收盤價
- * @returns {Promise<Object>} { [stockId]: price }
  */
 async function getOTCPrices() {
   return fetchToMap(
@@ -55,7 +53,6 @@ async function getOTCPrices() {
 
 /**
  * 取得上櫃股票營收資料
- * @returns {Promise<Object>} { [stockId]: { revenue, yoy, cumYoy } }
  */
 async function getOTCRevenue() {
   const fields = TPEX_FIELDS.revenue;

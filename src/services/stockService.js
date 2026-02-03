@@ -162,61 +162,10 @@ async function getStocksQuick() {
   return buildApiResponse(stocks, sectorBenchmarks);
 }
 
-/**
- * 取得單檔股票資料
- */
-async function getStockById(stockId, includeTechnical = false) {
-  const stockList = getPortfolio();
-  const stockItem = stockList.find(item => item.id === stockId);
-  
-  if (!stockItem) {
-    return null;
-  }
-  
-  const institutionalDays = getInstitutionalDays();
-  
-  // 載入原始資料
-  const rawData = await loadRawData({
-    stockIds: [stockId],
-    institutionalDays,
-    includeTechnical
-  });
-  
-  // 轉換資料
-  const stocks = transformStockList({
-    stockList: [stockItem],
-    rawData,
-    analyzeFn: includeTechnical ? createCompleteAnalyzer : createBasicAnalyzer,
-    includeTechnical
-  });
-  
-  return stocks[0] || null;
-}
-
-/**
- * 取得投資組合摘要（不含個股詳細資料）
- */
-async function getPortfolioSummary() {
-  const result = await getStocksQuick();
-  
-  return {
-    summary: result.summary,
-    sectorBenchmarks: result.sectorBenchmarks,
-    updatedAt: result.updatedAt
-  };
-}
-
 // ============== 匯出 ==============
 
 module.exports = {
   // 核心服務
   getStocksComplete,
-  getStocksQuick,
-  getStockById,
-  getPortfolioSummary,
-  
-  // 輔助函式（供進階使用或測試）
-  loadRawData,
-  createCompleteAnalyzer,
-  createBasicAnalyzer
+  getStocksQuick
 };

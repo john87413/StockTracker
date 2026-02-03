@@ -8,7 +8,6 @@ const { TWSE, TWSE_FIELDS, MARKET_TYPE } = require('../config');
 
 /**
  * 取得上市股票基本面資料（本益比、殖利率、股價淨值比）
- * @returns {Promise<Object>} { [stockId]: { name, pe, yieldRate, pb, market } }
  */
 async function getTWSEPeRatio() {
   const fields = TWSE_FIELDS.peRatio;
@@ -36,7 +35,6 @@ async function getTWSEPeRatio() {
 
 /**
  * 取得上市股票收盤價
- * @returns {Promise<Object>} { [stockId]: price }
  */
 async function getTWSEPrices() {
   return fetchToMap(
@@ -55,7 +53,6 @@ async function getTWSEPrices() {
 
 /**
  * 取得上市股票營收資料
- * @returns {Promise<Object>} { [stockId]: { revenue, yoy, cumYoy } }
  */
 async function getTWSERevenue() {
   const fields = TWSE_FIELDS.revenue;
