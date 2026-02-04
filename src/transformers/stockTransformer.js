@@ -4,7 +4,7 @@
  */
 
 const { formatConsecutiveDays } = require('../utils');
-const { getEmptyTechnical } = require('../technical');
+const { getEmptyTechnical } = require('../repositories/technical');
 const { getSectorBenchmark } = require('../config/portfolio');
 
 // ============== 預設值常數 ==============
@@ -129,7 +129,7 @@ function transformStock({
   const grahamNumber = calculateGrahamNumber(ratio.pe, ratio.pb);
   
   // 執行分析
-  const analysis = analyzeStock(ratio, rev, inst, tech, sectorBenchmark);
+  const analysis = analyzeStock(ratio, rev.yoy, inst, tech, sectorBenchmark);
   
   // 組合最終結果
   return {

@@ -4,8 +4,8 @@
  */
 
 // 外部 API 模組
-const { getAllBasicData, getInstitutionalAnalysis } = require('../datasource');
-const { getTechnicalAnalysis, getSparklineData } = require('../technical');
+const { getAllBasicData, getInstitutionalAnalysis } = require('../repositories/market');
+const { getTechnicalAnalysis, getSparklineData } = require('../repositories/technical');
 
 // 分析模組
 const { analyzeStock } = require('./analysis');

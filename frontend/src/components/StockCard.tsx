@@ -102,7 +102,7 @@ export function StockCard({ stock }: StockCardProps) {
       </div>
 
       {/* Body */}
-      <div className="p-4 flex-1 min-h-[180px] flex flex-col justify-between">
+      <div className="p-4 flex-1 min-h-[180px] flex flex-col">
         
         {/* Tab: 基本面 */}
         {activeTab === 'basic' && (
@@ -193,7 +193,7 @@ export function StockCard({ stock }: StockCardProps) {
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t border-[#1f1f22] align-end">
-           {stock.analysis.tags.length > 0 ? stock.analysis.tags.slice(0, 3).map((tag, idx) => (
+           {stock.analysis.tags.length > 0 ? stock.analysis.tags.map((tag, idx) => (
              <span key={idx} className="text-[12px] px-2 py-0.5 bg-white/5 rounded text-zinc-300 flex items-center gap-1 border border-white/5">
                {tag.icon} {tag.text}
              </span>

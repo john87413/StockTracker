@@ -3,7 +3,7 @@
  * 提供共用的 HTTP 請求邏輯
  */
 
-const { fetchJson, sleep } = require('../../utils');
+const { fetchJson, sleep } = require('../../../utils');
 const { REQUEST_CONFIG } = require('../config');
 
 /**

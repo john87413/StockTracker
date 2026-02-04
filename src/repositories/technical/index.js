@@ -8,7 +8,7 @@
  * - formatters.js: 格式化工具
  */
 
-const { sleep } = require('../utils');
+const { sleep } = require('../../utils');
 const { toYahooSymbol, REQUEST_CONFIG, SPARKLINE } = require('./config');
 const { fetchHistory, fetchSparklineData } = require('./yahooFetcher');
 const { calculateIndicators, getEmptyTechnical } = require('./indicators');

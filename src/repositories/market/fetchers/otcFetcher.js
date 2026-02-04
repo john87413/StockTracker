@@ -3,7 +3,7 @@
  */
 
 const { fetchToMap } = require('./baseFetcher');
-const { safeParseFloat } = require('../../utils');
+const { safeParseFloat } = require('../../../utils');
 const { TPEX, TPEX_FIELDS, MARKET_TYPE } = require('../config');
 
 /**

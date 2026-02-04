@@ -3,7 +3,7 @@
  */
 
 const { fetchWithRetry, safeParseJson } = require('../fetchers/baseFetcher');
-const { safeParseFloat, sleep, getLastNTradingDates } = require('../../utils');
+const { safeParseFloat, sleep, getLastNTradingDates } = require('../../../utils');
 const { TWSE, TPEX, TWSE_FIELDS, TPEX_FIELDS, REQUEST_CONFIG } = require('../config');
 
 // ============== 資料解析 ==============

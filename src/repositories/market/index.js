@@ -29,9 +29,6 @@ const {
   getInstitutionalAnalysis
 } = require('./processors/institutionalProcessor');
 
-// 設定（供外部使用）
-const config = require('./config');
-
 // ============== 整合函式 ==============
 
 /**
@@ -79,7 +76,4 @@ module.exports = {
   // 主要 API（向下相容）
   getAllBasicData,
   getInstitutionalAnalysis,
-  
-  // 設定（供外部讀取）
-  config
 };
