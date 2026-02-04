@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { StockData } from '../types/stock';
 import { TrendText } from './ui/TrendText';
 import { Sparkline } from './charts/Sparkline';
-import { cn, formatK, formatPrice, formatPercent } from '../lib/utils';
+import { cn, formatK, formatPrice, formatPercent, formatConsecutiveDays } from '../lib/utils';
 
 interface StockCardProps {
   stock: StockData;
@@ -156,7 +156,7 @@ export function StockCard({ stock }: StockCardProps) {
                  label="今日動向" 
                  renderValue={<TrendText value={stock.institutional.today} renderText={(v) => formatK(v)} />} 
                />
-               <InfoItem label="連續天數" value={stock.institutional.consecutiveDisplay} />
+               <InfoItem label="連續天數" value={formatConsecutiveDays(stock.institutional.consecutiveDays)} />
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center pt-1">

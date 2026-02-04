@@ -87,16 +87,9 @@ function getLastNTradingDates(days) {
   return dates;
 }
 
-// 格式化連續天數
-function formatConsecutiveDays(days) {
-  if (days === 0) return "-";
-  return days > 0 ? `連買${days}天` : `連賣${Math.abs(days)}天`;
-}
-
 module.exports = {
   safeParseFloat,
   fetchJson,
   sleep,
   getLastNTradingDates,
-  formatConsecutiveDays,
 };

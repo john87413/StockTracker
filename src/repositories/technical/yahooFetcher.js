@@ -2,7 +2,7 @@
  * Yahoo Finance 資料抓取器
  */
 
-const { YAHOO_FINANCE, REQUEST_CONFIG, toYahooSymbol } = require('./config');
+const { YAHOO_FINANCE, REQUEST_CONFIG } = require('./config');
 
 /**
  * 從 Yahoo Finance 抓取歷史股價
@@ -97,36 +97,7 @@ function parseChartResult(json) {
   return history.length > 0 ? history : null;
 }
 
-/**
- * 批次抓取多檔股票的歷史資料
- */
-async function fetchMultipleHistory(stocks, onProgress = null) {
-  const { sleep } = require('../utils');
-  const results = {};
-  
-  for (let i = 0; i < stocks.length; i++) {
-    const { id, market } = stocks[i];
-    const symbol = toYahooSymbol(id, market);
-    
-    if (onProgress) {
-      onProgress(id, i + 1, stocks.length);
-    }
-    
-    const history = await fetchHistory(symbol);
-    results[id] = history;
-    
-    // 請求間隔
-    if (i < stocks.length - 1) {
-      await sleep(REQUEST_CONFIG.delay.technical);
-    }
-  }
-  
-  return results;
-}
-
 module.exports = {
   fetchHistory,
-  fetchSparklineData,
-  parseChartResult,
-  fetchMultipleHistory
+  fetchSparklineData
 };

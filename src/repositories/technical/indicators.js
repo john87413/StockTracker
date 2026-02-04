@@ -132,7 +132,7 @@ function determineTrend(price, ma20, ma60, ma120) {
  */
 function calculateIndicators(history) {
   if (!history || history.length === 0) {
-    return getEmptyTechnical();
+    return null;
   }
   
   const closes = history.map(h => h.close);
@@ -164,23 +164,6 @@ function calculateIndicators(history) {
   };
 }
 
-/**
- * 取得空的技術指標物件
- */
-function getEmptyTechnical() {
-  return {
-    ma20: null,
-    ma60: null,
-    ma120: null,
-    distanceFromMa60: null,
-    trend: TREND.types.noData,
-    change1m: null,
-    change3m: null,
-    dataPoints: 0
-  };
-}
-
 module.exports = {
-  calculateIndicators,
-  getEmptyTechnical
+  calculateIndicators
 };

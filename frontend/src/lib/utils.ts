@@ -27,3 +27,10 @@ export function formatPercent(num: number | null | undefined): string {
   const sign = num > 0 ? '+' : '';
   return `${sign}${num.toFixed(1)}%`;
 }
+
+// 格式化連續買賣天數
+export function formatConsecutiveDays(days: number | null | undefined): string {
+  if (days === null || days === undefined || days === 0) return '-';
+  if (days > 0) return `連買${days}天`;
+  return `連賣${Math.abs(days)}天`;
+}

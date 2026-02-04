@@ -11,7 +11,7 @@
 const { sleep } = require('../../utils');
 const { toYahooSymbol, REQUEST_CONFIG, SPARKLINE } = require('./config');
 const { fetchHistory, fetchSparklineData } = require('./yahooFetcher');
-const { calculateIndicators, getEmptyTechnical } = require('./indicators');
+const { calculateIndicators } = require('./indicators');
 
 // ============== 主要 API ==============
 
@@ -31,15 +31,14 @@ async function getTechnicalAnalysis(stockIds, ratios) {
     // 檢查是否有市場別資訊
     if (!stockInfo) {
       console.log(`  [${id}] 查無市場別，跳過`);
-      result[id] = getEmptyTechnical();
+      result[id] = null;
       continue;
     }
     
     // 轉換為 Yahoo 代號
     const yahooSymbol = toYahooSymbol(id, stockInfo.market);
-    const marketLabel = stockInfo.market === 'OTC' ? '上櫃' : '上市';
     
-    console.log(`  抓取 ${id} (${marketLabel}) -> ${yahooSymbol}...`);
+    console.log(`  抓取 ${id} (${stockInfo.market}) -> ${yahooSymbol}...`);
     
     // 抓取歷史資料
     const history = await fetchHistory(yahooSymbol);
@@ -49,7 +48,7 @@ async function getTechnicalAnalysis(stockIds, ratios) {
       successCount++;
     } else {
       console.log(`  [${id}] 無法取得歷史資料`);
-      result[id] = getEmptyTechnical();
+      result[id] = null;
     }
     
     // 請求間隔
@@ -71,14 +70,12 @@ async function getSparklineData(stockIds, ratios) {
   const result = {};
   let successCount = 0;
   
-  const emptySparkline = { prices: [], change: null };
-  
   for (let i = 0; i < stockIds.length; i++) {
     const id = stockIds[i];
     const stockInfo = ratios?.[id];
     
     if (!stockInfo) {
-      result[id] = emptySparkline;
+      result[id] = null;
       continue;
     }
     
@@ -95,10 +92,10 @@ async function getSparklineData(stockIds, ratios) {
         result[id] = { prices: closes, change };
         successCount++;
       } else {
-        result[id] = closes ? { prices: closes, change: null } : emptySparkline;
+        result[id] = closes ? { prices: closes, change: null } : null;
       }
     } catch (e) {
-      result[id] = emptySparkline;
+      result[id] = null;
     }
     
     // 請求間隔
@@ -116,6 +113,5 @@ async function getSparklineData(stockIds, ratios) {
 module.exports = {
   // 主要 API（向下相容）
   getTechnicalAnalysis,
-  getSparklineData,
-  getEmptyTechnical
+  getSparklineData
 };
